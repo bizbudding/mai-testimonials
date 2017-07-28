@@ -172,7 +172,8 @@ final class Mai_Testimonials_Setup {
 
 	public function setup() {
 
-		add_action( 'init', array( $this, 'register_content_types' ) );
+		add_action( 'init',               array( $this, 'register_content_types' ) );
+		add_action( 'template_redirect',  array( $this, 'redirect' ) );
 
 		register_activation_hook(   __FILE__, array( $this, 'activate' ) );
 		register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
@@ -204,6 +205,15 @@ final class Mai_Testimonials_Setup {
 	public function activate() {
 		$this->register_content_types();
 		flush_rewrite_rules();
+	}
+
+	// Redirect if trying to view a single testimonial
+	public function redirect() {
+		if ( ! is_singular( 'testimonial' ) ) {
+			return;
+		}
+		wp_redirect( home_url() );
+		exit();
 	}
 
 }
