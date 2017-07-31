@@ -1,0 +1,55 @@
+.flex-entry.testimonial {
+	background-color: transparent;
+}
+
+.mai-slider[data-slidestoshow="1"] .flex-entry.testimonial.slick-slide {
+	border: none;
+}
+
+.flex-entry.testimonial .entry-header {
+	-webkit-box-ordinal-group: 3;-ms-flex-order: 2;order: 2;
+	padding-top: 12px;
+}
+
+.flex-entry.testimonial .entry-header span {
+	display: inline-block;
+}
+
+.flex-entry.testimonial .entry-header .entry-title,
+.flex-entry.testimonial .entry-header .title {
+	font-size: 18px;
+}
+
+.flex-entry.testimonial .entry-header .url {
+	display: block;
+	font-size: 16px;
+}
+
+.flex-entry.testimonial .entry-header .entry-title,
+.flex-entry.testimonial .entry-header .title {
+	font-weight: bold;
+}
+
+.flex-entry.testimonial .entry-header .title::before {
+	display: inline-block;
+	content: "-";
+	margin: 0 6px;
+}
+
+.flex-entry.testimonial .entry-content {
+	font-size: 20px;
+	font-style: italic;
+	letter-spacing: 1px;
+}
+
+.flex-entry.testimonial .entry-image-link {
+	max-width: 120px;
+	border-radius: 50%;
+	overflow: hidden;
+}
+
+/* offset negative margin */
+.flex-entry.testimonial .entry-image-link.entry-image-before-entry:not(.aligncenter):not(.alignleft):not(.alignright) {
+	width: auto;
+	margin: auto;
+}
