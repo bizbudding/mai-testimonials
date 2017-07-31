@@ -178,10 +178,10 @@ final class Mai_Testimonials_Setup {
 		register_activation_hook(   __FILE__, array( $this, 'activate' ) );
 		register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
 
-		add_action( 'init',                array( $this, 'register_content_types' ) );
-		add_action( 'template_redirect',   array( $this, 'redirect' ) );
-		add_action( 'cmb2_admin_init',     array( $this, 'metabox' ) );
-		add_action( 'wp_enqueue_scripts',  array( $this, 'enqueue_scripts' ) );
+		add_action( 'init',                        array( $this, 'register_content_types' ) );
+		add_action( 'template_redirect',           array( $this, 'redirect' ) );
+		add_action( 'cmb2_admin_init',             array( $this, 'metabox' ) );
+		add_action( 'wp_enqueue_scripts',          array( $this, 'enqueue_scripts' ) );
 
 		add_filter( 'shortcode_atts_grid',         array( $this, 'grid_atts' ), 8, 3 );
 		add_filter( 'genesis_attr_flex-entry',     array( $this, 'flex_entry_atts'), 12, 3 );
