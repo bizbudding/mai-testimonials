@@ -15,19 +15,18 @@
 	display: inline-block;
 }
 
-.flex-entry.testimonial .entry-header .entry-title,
-.flex-entry.testimonial .entry-header .title {
-	font-size: 18px;
-}
-
-.flex-entry.testimonial .entry-header .url {
-	display: block;
-	font-size: 16px;
-}
 
 .flex-entry.testimonial .entry-header .entry-title,
 .flex-entry.testimonial .entry-header .title {
+	font-size: 1.2rem;
+}
+
+.flex-entry.testimonial .entry-header .entry-title {
 	font-weight: bold;
+}
+
+.flex-entry.testimonial .entry-header .title {
+	font-size: 1rem;
 }
 
 .flex-entry.testimonial .entry-header .title::before {
@@ -36,8 +35,13 @@
 	margin: 0 6px;
 }
 
+.flex-entry.testimonial .entry-header .url {
+	display: block;
+	font-size: 1rem;
+}
+
 .flex-entry.testimonial .entry-content {
-	font-size: 20px;
+	/* font-size: 20px; */
 	font-style: italic;
 	letter-spacing: 1px;
 }

@@ -6,8 +6,8 @@
  * Description:     Manage and display testimonials on your website.
  * Version:         0.1.0
  *
- * Author:          Mike Hemberger, BizBudding Inc
- * Author URI:      https://bizbudding.com
+ * Author:          MaiPro.io
+ * Author URI:      https://maipro.io
  */
 
 // Exit if accessed directly.
@@ -37,7 +37,6 @@ final class Mai_Testimonials_Setup {
 	 * @since   0.1.0
 	 * @static  var array $instance
 	 * @uses    Mai_Testimonials_Setup::setup_constants() Setup the constants needed.
-	 * @uses    Mai_Testimonials_Setup::includes() Include the required files.
 	 * @uses    Mai_Testimonials_Setup::setup() Activate, deactivate, etc.
 	 * @see     Mai_Testimonials()
 	 * @return  object | Mai_Testimonials_Setup The one true Mai_Testimonials_Setup
@@ -126,30 +125,26 @@ final class Mai_Testimonials_Setup {
 	}
 
 	public function init() {
-		/**
-		 * Setup the updater.
-		 * This class/code is in Mai Pro Engine.
-		 * Since this is a dependent plugin, we don't include that code twice.
-		 *
-		 * @uses  https://github.com/YahnisElsts/plugin-update-checker/
-		 */
-		if ( class_exists( 'Puc_v4_Factory' ) ) {
-			$updater = Puc_v4_Factory::buildUpdateChecker( 'https://github.com/bizbudding/mai-testimonials/', __FILE__, 'mai-testimonials' );
-		}
 		// Bail if CMB2 is not running anywhere
 		if ( ! defined( 'CMB2_LOADED' ) ) {
 			add_action( 'admin_init',    array( $this, 'deactivate_plugin' ) );
 			add_action( 'admin_notices', array( $this, 'admin_notice' ) );
 			return;
 		}
-		// Includes
-		$this->includes();
-		// Run
-		$this->run();
-	}
+		/**
+		 * Setup the updater.
+		 *
+		 * @uses    https://github.com/YahnisElsts/plugin-update-checker/
+		 *
+		 * @return  void
+		 */
+		if ( ! class_exists( 'Puc_v4_Factory' ) ) {
+			require_once MAI_FAVORITES_PLUGIN_DIR . 'plugin-update-checker/plugin-update-checker.php';
+		}
+		$updater = Puc_v4_Factory::buildUpdateChecker( 'https://github.com/maiprowp/mai-testimonials/', __FILE__, 'mai-testimonials' );
 
-	function deactivate_plugin() {
-		deactivate_plugins( plugin_basename( __FILE__ ) );
+		// Run
+		$this->hooks();
 	}
 
 	function admin_notice() {
@@ -159,39 +154,25 @@ final class Mai_Testimonials_Setup {
 		}
 	}
 
-	/**
-	 * Include required files.
-	 *
-	 * @access  private
-	 * @since   0.1.0
-	 * @return  void
-	 */
-	private function includes() {
-		foreach ( glob( MAI_TESTIMONIALS_INCLUDES_DIR . '*.php' ) as $file ) { include $file; }
-		require_once MAI_TESTIMONIALS_INCLUDES_DIR . 'vendor/extended-cpts.php';
-		require_once MAI_TESTIMONIALS_INCLUDES_DIR . 'vendor/extended-taxos.php';
-		require_once MAI_TESTIMONIALS_INCLUDES_DIR . 'vendor/plugin-update-checker/plugin-update-checker.php';
-	}
-
-	public function run() {
+	public function hooks() {
 
 		register_activation_hook(   __FILE__, array( $this, 'activate' ) );
 		register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
 
-		add_action( 'init',                        array( $this, 'register_content_types' ) );
-		add_action( 'template_redirect',           array( $this, 'redirect' ) );
-		add_action( 'cmb2_admin_init',             array( $this, 'metabox' ) );
-		add_action( 'wp_enqueue_scripts',          array( $this, 'enqueue_scripts' ) );
+		add_action( 'init',                                   array( $this, 'register_content_types' ) );
+		add_action( 'template_redirect',                      array( $this, 'redirect' ) );
+		add_action( 'cmb2_admin_init',                        array( $this, 'metabox' ) );
+		add_action( 'wp_enqueue_scripts',                     array( $this, 'enqueue_scripts' ) );
 
-		add_filter( 'shortcode_atts_grid',         array( $this, 'grid_atts' ), 8, 3 );
-		add_filter( 'genesis_attr_flex-entry',     array( $this, 'flex_entry_atts'), 12, 3 );
-		add_filter( 'genesis_attr_entry-content',  array( $this, 'entry_content_atts'), 12, 3 );
-		add_filter( 'genesis_attr_entry-header',   array( $this, 'entry_header_atts'), 12, 3 );
-		add_filter( 'genesis_attr_entry-title',    array( $this, 'entry_title_atts'), 12, 3 );
-		add_filter( 'mai_flex_entry_header',       array( $this, 'add_author_details' ), 10, 2 );
+		add_filter( 'manage_testimonial_posts_columns',       array( $this, 'cols' ) );
+		add_action( 'manage_testimonial_posts_custom_column', array( $this, 'col' ) );
 
-		// Setup the updater
-		$updater = Puc_v4_Factory::buildUpdateChecker( 'https://github.com/bizbudding/mai-testimonials/', __FILE__, 'mai-testimonials' );
+		add_filter( 'shortcode_atts_grid',                    array( $this, 'grid_atts' ), 8, 3 );
+		add_filter( 'genesis_attr_flex-entry',                array( $this, 'flex_entry_atts'), 12, 3 );
+		add_filter( 'genesis_attr_entry-content',             array( $this, 'entry_content_atts'), 12, 3 );
+		add_filter( 'genesis_attr_entry-header',              array( $this, 'entry_header_atts'), 12, 3 );
+		add_filter( 'genesis_attr_entry-title',               array( $this, 'entry_title_atts'), 12, 3 );
+		add_filter( 'mai_flex_entry_header',                  array( $this, 'add_author_details' ), 10, 2 );
 	}
 
 	public function activate() {
@@ -199,29 +180,62 @@ final class Mai_Testimonials_Setup {
 		flush_rewrite_rules();
 	}
 
+	function deactivate_plugin() {
+		deactivate_plugins( plugin_basename( __FILE__ ) );
+	}
+
+	function cols( $cols ) {
+		$date = $cols['date'];
+		unset( $cols['date'] );
+		$cols['testimonial_excerpt'] = 'Excerpt';
+		$cols['date']                = $date;
+		return $cols;
+	}
+
+	function col( $col ) {
+		if ( 'testimonial_excerpt' === $col ) {
+			echo esc_html( get_the_excerpt() );
+		}
+	}
+
 	public function register_content_types() {
 
-		$args = array(
-			'enter_title_here'    => __( 'Enter customer name here', 'mai-testimonials' ),
-			'exclude_from_search' => true,
-			'featured_image'      => __( 'Testimonial Image', 'mai-testimonials' ),
-			'menu_icon'           => 'dashicons-format-quote',
-			'public'              => false,
-			'publicly_queryable'  => true,
-			'show_in_menu'        => true,
-			'show_in_nav_menus'   => false,
-			'show_ui'             => true,
-			'supports'            => array( 'title', 'editor', 'thumbnail' ),
-		);
+		/***********************
+		 *  Custom Post Types  *
+		 ***********************/
 
-		$labels = array(
-			'singular' => 'Testimonial',
-			'plural'   => 'Testimonials',
-			'slug'     => 'testimonials'
-		);
+		register_post_type( 'testimonial',
+			apply_filters( 'mai_testimonial_args', array(
+				'exclude_from_search' => false,
+				'has_archive'         => false,
+				'hierarchical'        => true,
+				'labels'              => array(
+					'name'               => _x( 'Testimonials', 'testimonial general name'        , 'mai-testimonials' ),
+					'singular_name'      => _x( 'Testimonial' , 'testimonial singular name'       , 'mai-testimonials' ),
+					'menu_name'          => _x( 'Testimonials', 'testimonial admin menu'          , 'mai-testimonials' ),
+					'name_admin_bar'     => _x( 'Testimonial' , 'testimonial add new on admin bar', 'mai-testimonials' ),
+					'add_new'            => _x( 'Add New'  , 'Testimonial'                        , 'mai-testimonials' ),
+					'add_new_item'       => __( 'Add New Testimonial'                             , 'mai-testimonials' ),
+					'new_item'           => __( 'New Testimonial'                                 , 'mai-testimonials' ),
+					'edit_item'          => __( 'Edit Testimonial'                                , 'mai-testimonials' ),
+					'view_item'          => __( 'View Testimonial'                                , 'mai-testimonials' ),
+					'all_items'          => __( 'All Testimonials'                                , 'mai-testimonials' ),
+					'search_items'       => __( 'Search Testimonials'                             , 'mai-testimonials' ),
+					'parent_item_colon'  => __( 'Parent Testimonials:'                            , 'mai-testimonials' ),
+					'not_found'          => __( 'No Testimonials found.'                          , 'mai-testimonials' ),
+					'not_found_in_trash' => __( 'No Testimonials found in Trash.'                 , 'mai-testimonials' )
+				),
+				'menu_icon'          => 'dashicons-format-quote',
+				'public'             => false,
+				'publicly_queryable' => false,
+				'show_in_menu'       => true,
+				'show_in_nav_menus'  => false,
+				'show_ui'            => true,
+				'rewrite'            => false,
+				'supports'           => array( 'title', 'editor', 'thumbnail' ),
+			)
+		));
 
-		// Testimonials
-		register_extended_post_type( 'testimonial', apply_filters( 'mai_testimonial_args', $args ), apply_filters( 'mai_testimonial_labels', $labels ) );
 	}
 
 	// Redirect if trying to view a single testimonial
@@ -331,6 +345,7 @@ final class Mai_Testimonials_Setup {
 		if ( ! $this->is_testimonial( $atts ) ) {
 			return $attributes;
 		}
+		$attributes['class']   .= ' text-lg';
 		$attributes['itemprop'] = 'reviewBody';
 		return $attributes;
 	}
