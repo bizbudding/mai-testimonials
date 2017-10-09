@@ -278,7 +278,6 @@ final class Mai_Testimonials_Setup {
 		// Initiate the metabox
 		$cmb = new_cmb2_box( array(
 			'id'              => 'mai_testimonials',
-			// 'title'           => __( 'Testimonial Details', 'mai-testimonials' ),
 			'object_types'    => array( 'testimonial' ),
 			'context'         => 'after_title',
 			'show_names'      => true,
@@ -288,20 +287,22 @@ final class Mai_Testimonials_Setup {
 		// Regular text field
 		$cmb->add_field( array(
 			'name'       => __( 'Byline', 'mai-testimonials' ),
-			// 'desc'       => __( 'Enter a byline for the customer giving this testimonial (for example: "CEO of MaiPro").', 'mai-testimonials' ),
 			'id'         => 'byline',
 			'type'       => 'text',
-			'attributes' => array( 'placeholder' => __( 'CEO of MaiPro', 'mai-testimonials' ) ),
+			'attributes' => array(
+				'placeholder' => __( 'CEO of MaiPro', 'mai-testimonials' ),
+			),
 		) );
 
 		// URL text field
 		$cmb->add_field( array(
 			'name'       => __( 'Website URL', 'mai-testimonials' ),
-			// 'desc'       => __( 'Enter a URL that applies to this customer (for example: https://maipro.io).', 'mai-testimonials' ),
 			'id'         => 'url',
 			'type'       => 'text_url',
 			'before'     => '<span class="dashicons dashicons-admin-links"></span>',
-			'attributes' => array( 'placeholder' => 'https://maipro.io' ),
+			'attributes' => array(
+				'placeholder' => 'https://maipro.io',
+			),
 		) );
 	}
 
@@ -340,6 +341,10 @@ final class Mai_Testimonials_Setup {
 			#cmb2-metabox-mai_testimonials input {
 				-webkit-box-flex: 1;-ms-flex: 1 1 auto;flex: 1 1 auto;
 			}
+			#cmb2-metabox-mai_testimonials input:focus::-webkit-input-placeholder { color:transparent; }
+			#cmb2-metabox-mai_testimonials input:focus:-moz-placeholder { color:transparent; }
+			#cmb2-metabox-mai_testimonials input:focus::-moz-placeholder { color:transparent; }
+			#cmb2-metabox-mai_testimonials input:focus:-ms-input-placeholder { color:transparent; }
 			#cmb2-metabox-mai_testimonials .dashicons {
 				height: auto;
 				background: #f5f5f5;
