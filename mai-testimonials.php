@@ -4,7 +4,7 @@
  * Plugin Name:     Mai - Testimonials
  * Plugin URI:      https://maipro.io
  * Description:     Manage and display testimonials on your website.
- * Version:         0.1.0
+ * Version:         0.2.0
  *
  * Author:          MaiPro.io
  * Author URI:      https://maipro.io
@@ -160,8 +160,10 @@ final class Mai_Testimonials_Setup {
 		register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
 
 		add_action( 'init',                                   array( $this, 'register_content_types' ) );
+		add_filter( 'enter_title_here',                       array( $this, 'enter_title_text' ) );
 		add_action( 'template_redirect',                      array( $this, 'redirect' ) );
 		add_action( 'cmb2_admin_init',                        array( $this, 'metabox' ) );
+		add_action( 'current_screen',                         array( $this, 'maybe_do_admin_functions' ) );
 		add_action( 'wp_enqueue_scripts',                     array( $this, 'enqueue_scripts' ) );
 
 		add_filter( 'manage_testimonial_posts_columns',       array( $this, 'cols' ) );
@@ -238,7 +240,26 @@ final class Mai_Testimonials_Setup {
 
 	}
 
-	// Redirect if trying to view a single testimonial
+	/**
+	 * Change the enter title here text.
+	 *
+	 * @param  string  $title  The existing title placeholder.
+	 *
+	 * @return string  The modified title placeholder.
+	 */
+	function enter_title_text( $title ){
+		$screen = get_current_screen();
+		if ( 'testimonial' !== $screen->post_type ) {
+			return $title;
+		}
+		return __( 'Enter person\'s name here', 'mai-testimonials' );
+	}
+
+	/**
+	 * Redirect if trying to view a single testimonial,
+	 *
+	 * @return void
+	 */
 	public function redirect() {
 		if ( ! is_singular( 'testimonial' ) ) {
 			return;
@@ -249,34 +270,95 @@ final class Mai_Testimonials_Setup {
 
 	/**
 	 * Define the metabox and field configurations.
+	 *
+	 * @return void
 	 */
 	function metabox() {
 
 		// Initiate the metabox
 		$cmb = new_cmb2_box( array(
-			'id'           => 'mai_testimonials',
-			'title'        => __( 'Testimonial Details', 'mai-testimonials' ),
-			'object_types' => array( 'testimonial' ),
-			'context'      => 'normal',
-			'priority'     => 'high',
-			'show_names'   => true, // Show field names on the left
+			'id'              => 'mai_testimonials',
+			// 'title'           => __( 'Testimonial Details', 'mai-testimonials' ),
+			'object_types'    => array( 'testimonial' ),
+			'context'         => 'after_title',
+			'show_names'      => true,
+			'remove_box_wrap' => true,
 		) );
 
 		// Regular text field
 		$cmb->add_field( array(
-			'name' => __( 'Byline', 'mai-testimonials' ),
-			'desc' => __( 'Enter a byline for the customer giving this testimonial (for example: "CEO of MaiPro").', 'mai-testimonials' ),
-			'id'   => 'byline',
-			'type' => 'text',
+			'name'       => __( 'Byline', 'mai-testimonials' ),
+			// 'desc'       => __( 'Enter a byline for the customer giving this testimonial (for example: "CEO of MaiPro").', 'mai-testimonials' ),
+			'id'         => 'byline',
+			'type'       => 'text',
+			'attributes' => array( 'placeholder' => __( 'CEO of MaiPro', 'mai-testimonials' ) ),
 		) );
 
 		// URL text field
 		$cmb->add_field( array(
-			'name' => __( 'Website URL', 'mai-testimonials' ),
-			'desc' => __( 'Enter a URL that applies to this customer (for example: https://maipro.io).', 'mai-testimonials' ),
-			'id'   => 'url',
-			'type' => 'text_url',
+			'name'       => __( 'Website URL', 'mai-testimonials' ),
+			// 'desc'       => __( 'Enter a URL that applies to this customer (for example: https://maipro.io).', 'mai-testimonials' ),
+			'id'         => 'url',
+			'type'       => 'text_url',
+			'before'     => '<span class="dashicons dashicons-admin-links"></span>',
+			'attributes' => array( 'placeholder' => 'https://maipro.io' ),
 		) );
+	}
+
+	/**
+	 * Maybe add custom CSS and filter the metabox text.
+	 *
+	 * @return  void
+	 */
+	function maybe_do_admin_functions() {
+		$screen = get_current_screen();
+		if ( 'testimonial' !== $screen->post_type ) {
+			return;
+		}
+		add_action( 'admin_head', array( $this, 'admin_css' ) );
+	}
+
+	/**
+	 * Add custom CSS to <head>
+	 *
+	 * @since  1.0.0
+	 *
+	 * @return void
+	 */
+	function admin_css() {
+		echo '<style type="text/css">
+			.cmb2-context-wrap.cmb2-context-wrap-mai_testimonials {
+				margin-top: 16px;
+			}
+			#cmb2-metabox-mai_testimonials .cmb-td {
+				display: -webkit-box;display: -ms-flexbox;display: flex;
+				-ms-flex-wrap: wrap;flex-wrap: wrap;
+				flex: 1 1 100%;
+				width: 100%;
+				max-width: 100%;
+			}
+			#cmb2-metabox-mai_testimonials input {
+				-webkit-box-flex: 1;-ms-flex: 1 1 auto;flex: 1 1 auto;
+			}
+			#cmb2-metabox-mai_testimonials .dashicons {
+				height: auto;
+				background: #f5f5f5;
+				color: #666;
+				font-size: 18px;
+				line-height: 18px;
+				padding: 5px 3px 2px;
+				margin: 1px -2px 1px 0;
+				border: 1px solid #ddd;
+			}
+			#cmb2-metabox-mai_testimonials .cmb2-metabox-description {
+				-webkit-box-flex: 1;-ms-flex: 1 0 100%;flex: 1 0 100%;
+				font-size: 12px;
+				font-style: normal;
+				margin: 4px 0 0;
+				padding: 0;
+			}
+		}
+		</style>';
 	}
 
 	function enqueue_scripts() {
