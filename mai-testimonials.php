@@ -4,7 +4,7 @@
  * Plugin Name:     Mai - Testimonials
  * Plugin URI:      https://maipro.io
  * Description:     Manage and display testimonials on your website.
- * Version:         0.2.0
+ * Version:         0.3.0
  *
  * Author:          MaiPro.io
  * Author URI:      https://maipro.io
