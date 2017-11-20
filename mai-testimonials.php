@@ -4,7 +4,7 @@
  * Plugin Name:     Mai - Testimonials
  * Plugin URI:      https://maipro.io
  * Description:     Manage and display testimonials on your website.
- * Version:         0.3.0
+ * Version:         0.4.0
  *
  * Author:          MaiPro.io
  * Author URI:      https://maipro.io
@@ -139,7 +139,7 @@ final class Mai_Testimonials_Setup {
 		 * @return  void
 		 */
 		if ( ! class_exists( 'Puc_v4_Factory' ) ) {
-			require_once MAI_FAVORITES_PLUGIN_DIR . 'plugin-update-checker/plugin-update-checker.php';
+			require_once MAI_TESTIMONIALS_PLUGIN_DIR . 'plugin-update-checker/plugin-update-checker.php';
 		}
 		$updater = Puc_v4_Factory::buildUpdateChecker( 'https://github.com/maiprowp/mai-testimonials/', __FILE__, 'mai-testimonials' );
 
