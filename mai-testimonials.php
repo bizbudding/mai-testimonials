@@ -1,53 +1,51 @@
 <?php
 
 /**
- * Plugin Name:     Mai - Testimonials
- * Plugin URI:      https://maipro.io
+ * Plugin Name:     Mai Testimonials
+ * Plugin URI:      https://maitheme.com
  * Description:     Manage and display testimonials on your website.
- * Version:         0.4.0
+ * Version:         0.5.0
  *
- * Author:          MaiPro.io
- * Author URI:      https://maipro.io
+ * Author:          MaiTheme.com
+ * Author URI:      https://maitheme.com
  */
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-if ( ! class_exists( 'Mai_Testimonials_Setup' ) ) :
-
 /**
- * Main Mai_Testimonials_Setup Class.
+ * Main Mai_Testimonials Class.
  *
  * @since 0.1.0
  */
-final class Mai_Testimonials_Setup {
+final class Mai_Testimonials {
 
 	/**
-	 * @var    Mai_Testimonials_Setup The one true Mai_Testimonials_Setup
+	 * @var    Mai_Testimonials The one true Mai_Testimonials
 	 * @since  0.1.0
 	 */
 	private static $instance;
 
 	/**
-	 * Main Mai_Testimonials_Setup Instance.
+	 * Main Mai_Testimonials Instance.
 	 *
-	 * Insures that only one instance of Mai_Testimonials_Setup exists in memory at any one
+	 * Insures that only one instance of Mai_Testimonials exists in memory at any one
 	 * time. Also prevents needing to define globals all over the place.
 	 *
 	 * @since   0.1.0
 	 * @static  var array $instance
-	 * @uses    Mai_Testimonials_Setup::setup_constants() Setup the constants needed.
-	 * @uses    Mai_Testimonials_Setup::setup() Activate, deactivate, etc.
+	 * @uses    Mai_Testimonials::setup_constants() Setup the constants needed.
+	 * @uses    Mai_Testimonials::setup() Activate, deactivate, etc.
 	 * @see     Mai_Testimonials()
-	 * @return  object | Mai_Testimonials_Setup The one true Mai_Testimonials_Setup
+	 * @return  object | Mai_Testimonials The one true Mai_Testimonials
 	 */
 	public static function instance() {
 		if ( ! isset( self::$instance ) ) {
 			// Setup the init
-			self::$instance = new Mai_Testimonials_Setup;
+			self::$instance = new Mai_Testimonials;
 			// Methods
 			self::$instance->setup_constants();
-			self::$instance->setup();
+			self::$instance->init();
 		}
 		return self::$instance;
 	}
@@ -120,11 +118,11 @@ final class Mai_Testimonials_Setup {
 
 	}
 
-	public function setup() {
-		add_action( 'plugins_loaded', array( $this, 'init' ) );
+	public function init() {
+		add_action( 'plugins_loaded', array( $this, 'setup' ) );
 	}
 
-	public function init() {
+	public function setup() {
 		// Bail if CMB2 is not running anywhere
 		if ( ! defined( 'CMB2_LOADED' ) ) {
 			add_action( 'admin_init',    array( $this, 'deactivate_plugin' ) );
@@ -139,16 +137,16 @@ final class Mai_Testimonials_Setup {
 		 * @return  void
 		 */
 		if ( ! class_exists( 'Puc_v4_Factory' ) ) {
-			require_once MAI_TESTIMONIALS_PLUGIN_DIR . 'plugin-update-checker/plugin-update-checker.php';
+			require_once MAI_TESTIMONIALS_PLUGIN_DIR . 'plugin-update-checker/plugin-update-checker.php'; // 4.4
 		}
-		$updater = Puc_v4_Factory::buildUpdateChecker( 'https://github.com/maiprowp/mai-testimonials/', __FILE__, 'mai-testimonials' );
+		$updater = Puc_v4_Factory::buildUpdateChecker( 'https://github.com/maithemewp/mai-testimonials/', __FILE__, 'mai-testimonials' );
 
 		// Run
 		$this->hooks();
 	}
 
 	function admin_notice() {
-		printf( '<div class="notice notice-warning is-dismissible"><p>%s</p></div>', __( 'Mai - Testimonials requires the Mai Pro Engine plugin or CMB2 plugin in order to run. As a result, this plugin has been deactivated.', 'mai-testimonials' ) );
+		printf( '<div class="notice notice-warning is-dismissible"><p>%s</p></div>', __( 'Mai Testimonials requires the Mai Theme Engine plugin or CMB2 plugin in order to run. As a result, this plugin has been deactivated.', 'mai-testimonials' ) );
 		if ( isset( $_GET['activate'] ) ) {
 			unset( $_GET['activate'] );
 		}
@@ -164,7 +162,7 @@ final class Mai_Testimonials_Setup {
 		add_action( 'template_redirect',                      array( $this, 'redirect' ) );
 		add_action( 'cmb2_admin_init',                        array( $this, 'metabox' ) );
 		add_action( 'current_screen',                         array( $this, 'maybe_do_admin_functions' ) );
-		add_action( 'wp_enqueue_scripts',                     array( $this, 'enqueue_scripts' ) );
+		add_action( 'wp_enqueue_scripts',                     array( $this, 'css' ), 1000 ); // Way late cause Engine changes stylesheet to 999.
 
 		add_filter( 'manage_testimonial_posts_columns',       array( $this, 'cols' ) );
 		add_action( 'manage_testimonial_posts_custom_column', array( $this, 'col' ) );
@@ -243,7 +241,7 @@ final class Mai_Testimonials_Setup {
 				'rewrite'            => false,
 				'supports'           => array( 'title', 'editor', 'thumbnail' ),
 			)
-		));
+		) );
 
 		/***********************
 		 *  Custom Taxonomies  *
@@ -255,7 +253,7 @@ final class Mai_Testimonials_Setup {
 				'has_archive'         => false,
 				'hierarchical'        => true,
 				'labels' => array(
-					'name'                       => _x( 'Testimonial Categories', 'taxonomy general name', 'mai-testimonials' ),
+					'name'                       => _x( 'Testimonial Categories', 'taxonomy general name' , 'mai-testimonials' ),
 					'singular_name'              => _x( 'Testimonial Category' , 'taxonomy singular name' , 'mai-testimonials' ),
 					'search_items'               => __( 'Search Testimonial Categories'                   , 'mai-testimonials' ),
 					'popular_items'              => __( 'Popular Testimonial Categories'                  , 'mai-testimonials' ),
@@ -280,7 +278,7 @@ final class Mai_Testimonials_Setup {
 				'show_tagcloud'     => false,
 				'show_ui'           => true,
 			)
-		));
+		) );
 
 	}
 
@@ -334,7 +332,7 @@ final class Mai_Testimonials_Setup {
 			'id'         => 'byline',
 			'type'       => 'text',
 			'attributes' => array(
-				'placeholder' => __( 'CEO of MaiPro', 'mai-testimonials' ),
+				'placeholder' => __( 'CEO of Mai Theme', 'mai-testimonials' ),
 			),
 		) );
 
@@ -345,7 +343,7 @@ final class Mai_Testimonials_Setup {
 			'type'       => 'text_url',
 			'before'     => '<span class="dashicons dashicons-admin-links"></span>',
 			'attributes' => array(
-				'placeholder' => 'https://maipro.io',
+				'placeholder' => 'https://maitheme.com',
 			),
 		) );
 	}
@@ -410,9 +408,68 @@ final class Mai_Testimonials_Setup {
 		</style>';
 	}
 
-	function enqueue_scripts() {
-		// Register CSS file for later
-		wp_register_style( 'mai-testimonials', MAI_TESTIMONIALS_PLUGIN_URL . 'assets/mai-testimonials.css', array(), MAI_TESTIMONIALS_VERSION );
+	/**
+	 * Add inline CSS.
+	 *
+	 * @since 0.5.0
+	 *
+	 * @link  http://www.billerickson.net/code/enqueue-inline-styles/
+	 * @link  https://sridharkatakam.com/chevron-shaped-featured-parallax-section-in-genesis-using-clip-path/
+	 */
+	function css() {
+		$css = '
+			.flex-entry.testimonial {
+				background-color: transparent;
+				border-radius: 5px;
+			}
+			.mai-slider[data-slidestoshow="1"] .flex-entry.testimonial.slick-slide {
+				border: none;
+				-webkit-box-shadow: none;
+				box-shadow: none;
+			}
+			.flex-entry.testimonial .entry-header {
+				-webkit-box-ordinal-group: 3;-ms-flex-order: 2;order: 2;
+				padding-top: 12px;
+			}
+			.flex-entry.testimonial .entry-header span {
+				display: inline-block;
+			}
+			.flex-entry.testimonial .entry-header .entry-title,
+			.flex-entry.testimonial .entry-header .title {
+				font-size: 1.2rem;
+			}
+			.flex-entry.testimonial .entry-header .entry-title {
+				font-weight: bold;
+			}
+			.flex-entry.testimonial .entry-header .title {
+				font-size: 1rem;
+			}
+			.flex-entry.testimonial .entry-header .title::before {
+				display: inline-block;
+				content: "-";
+				margin: 0 6px;
+			}
+			.flex-entry.testimonial .entry-header .url {
+				display: block;
+				font-size: 1rem;
+			}
+			.flex-entry.testimonial .entry-content {
+				font-style: italic;
+				letter-spacing: 1px;
+			}
+			.flex-entry.testimonial .entry-image-link {
+				max-width: 120px;
+				border-radius: 50%;
+				overflow: hidden;
+			}
+			/* offset negative margin */
+			.flex-entry.testimonial .entry-image-link.entry-image-before-entry:not(.aligncenter):not(.alignleft):not(.alignright) {
+				width: auto;
+				margin: auto;
+			}
+		';
+		$handle = ( defined( 'CHILD_THEME_NAME' ) && CHILD_THEME_NAME ) ? sanitize_title_with_dashes( CHILD_THEME_NAME ) : 'child-theme';
+		wp_add_inline_style( $handle, $css );
 	}
 
 	/**
@@ -430,9 +487,6 @@ final class Mai_Testimonials_Setup {
 		if ( 'testimonial' !== $atts['content'] ) {
 			return $out;
 		}
-
-		// Enqueue CSS file
-		wp_enqueue_style( 'mai-testimonials' );
 
 		if ( ! isset( $atts['align'] ) ) {
 			$out['align'] = 'center, middle';
@@ -533,12 +587,11 @@ final class Mai_Testimonials_Setup {
 	}
 
 }
-endif; // End if class_exists check.
 
 /**
- * The main function for that returns Mai_Testimonials_Setup
+ * The main function for that returns Mai_Testimonials
  *
- * The main function responsible for returning the one true Mai_Testimonials_Setup
+ * The main function responsible for returning the one true Mai_Testimonials
  * Instance to functions everywhere.
  *
  * Use this function like you would a global variable, except without needing
@@ -548,10 +601,10 @@ endif; // End if class_exists check.
  *
  * @since 0.1.0
  *
- * @return object|Mai_Testimonials_Setup The one true Mai_Testimonials_Setup Instance.
+ * @return object|Mai_Testimonials The one true Mai_Testimonials Instance.
  */
 function Mai_Testimonials() {
-	return Mai_Testimonials_Setup::instance();
+	return Mai_Testimonials::instance();
 }
 
 // Get Mai_Testimonials Running.
