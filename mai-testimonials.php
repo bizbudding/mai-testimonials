@@ -129,17 +129,19 @@ final class Mai_Testimonials {
 			add_action( 'admin_notices', array( $this, 'admin_notice' ) );
 			return;
 		}
-		/**
-		 * Setup the updater.
-		 *
-		 * @uses    https://github.com/YahnisElsts/plugin-update-checker/
-		 *
-		 * @return  void
-		 */
-		if ( ! class_exists( 'Puc_v4_Factory' ) ) {
-			require_once MAI_TESTIMONIALS_PLUGIN_DIR . 'plugin-update-checker/plugin-update-checker.php'; // 4.4
+		if ( is_admin() ) {
+			/**
+			 * Setup the updater.
+			 *
+			 * @uses    https://github.com/YahnisElsts/plugin-update-checker/
+			 *
+			 * @return  void
+			 */
+			if ( ! class_exists( 'Puc_v4_Factory' ) ) {
+				require_once MAI_TESTIMONIALS_PLUGIN_DIR . 'plugin-update-checker/plugin-update-checker.php'; // 4.4
+			}
+			$updater = Puc_v4_Factory::buildUpdateChecker( 'https://github.com/maithemewp/mai-testimonials/', __FILE__, 'mai-testimonials' );
 		}
-		$updater = Puc_v4_Factory::buildUpdateChecker( 'https://github.com/maithemewp/mai-testimonials/', __FILE__, 'mai-testimonials' );
 
 		// Run
 		$this->hooks();
