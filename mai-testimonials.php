@@ -465,9 +465,10 @@ final class Mai_Testimonials {
 				overflow: hidden;
 			}
 			/* offset negative margin */
-			.flex-entry.testimonial .entry-image-link.entry-image-before-entry:not(.aligncenter):not(.alignleft):not(.alignright) {
+			.flex-entry.testimonial .entry-image-link.entry-image-before-entry.alignnone {
 				width: auto;
-				margin: auto;
+				margin-left: auto;
+				margin-right: auto;
 			}
 		';
 		$handle = ( defined( 'CHILD_THEME_NAME' ) && CHILD_THEME_NAME ) ? sanitize_title_with_dashes( CHILD_THEME_NAME ) : 'child-theme';
@@ -485,13 +486,17 @@ final class Mai_Testimonials {
 	 */
 	function grid_atts( $out, $pairs, $atts ) {
 
-		// Bail if not a testimonial
-		if ( 'testimonial' !== $atts['content'] ) {
+		// Bail if not a testimonial.
+		if ( ! isset( $atts['content'] ) || 'testimonial' !== $atts['content'] ) {
 			return $out;
 		}
 
 		if ( ! isset( $atts['align'] ) ) {
 			$out['align'] = 'center, middle';
+		}
+
+		if ( ! isset( $atts['boxed'] ) ) {
+			$out['boxed'] = false;
 		}
 
 		if ( ! isset( $atts['columns'] ) ) {
