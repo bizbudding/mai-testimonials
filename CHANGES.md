@@ -1,6 +1,7 @@
 ### Changelog
 
 * Changed: Only run updater in the admin.
+* Fixed: Check [grid] 'content' attribute isset before checking if it's a testimonial.
 
 #### 0.5.0
 * Changed: Updater script to latest version. Load styles via wp_add_inline_style intead of loading a full CSS file just for a few lines of code.
