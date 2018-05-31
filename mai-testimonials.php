@@ -123,7 +123,7 @@ final class Mai_Testimonials {
 	}
 
 	public function setup() {
-		// Bail if CMB2 is not running anywhere
+		// Bail if CMB2 is not running anywhere.
 		if ( ! defined( 'CMB2_LOADED' ) ) {
 			add_action( 'admin_init',    array( $this, 'deactivate_plugin' ) );
 			add_action( 'admin_notices', array( $this, 'admin_notice' ) );
@@ -160,6 +160,7 @@ final class Mai_Testimonials {
 		register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
 
 		add_action( 'init',                                   array( $this, 'register_content_types' ) );
+		add_filter( 'pre_get_posts',                          array( $this, 'remove_from_search' ) );
 		add_filter( 'enter_title_here',                       array( $this, 'enter_title_text' ) );
 		add_action( 'template_redirect',                      array( $this, 'redirect' ) );
 		add_action( 'cmb2_admin_init',                        array( $this, 'metabox' ) );
@@ -175,6 +176,7 @@ final class Mai_Testimonials {
 		add_filter( 'genesis_attr_entry-header',              array( $this, 'entry_header_atts'), 12, 3 );
 		add_filter( 'genesis_attr_entry-title',               array( $this, 'entry_title_atts'), 12, 3 );
 		add_filter( 'mai_flex_entry_header',                  array( $this, 'add_author_details' ), 10, 2 );
+
 	}
 
 	public function activate() {
@@ -213,7 +215,7 @@ final class Mai_Testimonials {
 			apply_filters( 'mai_testimonial_args', array(
 				'exclude_from_search' => false,
 				'has_archive'         => false,
-				'hierarchical'        => true,
+				'hierarchical'        => false,
 				'labels'              => array(
 					'name'                  => _x( 'Testimonials', 'testimonial general name'        , 'mai-testimonials' ),
 					'singular_name'         => _x( 'Testimonial' , 'testimonial singular name'       , 'mai-testimonials' ),
@@ -236,7 +238,7 @@ final class Mai_Testimonials {
 				),
 				'menu_icon'          => 'dashicons-format-quote',
 				'public'             => false,
-				'publicly_queryable' => false,
+				'publicly_queryable' => true,
 				'show_in_menu'       => true,
 				'show_in_nav_menus'  => false,
 				'show_ui'            => true,
@@ -282,6 +284,23 @@ final class Mai_Testimonials {
 			)
 		) );
 
+	}
+
+	/**
+	 * Remove testimonials from search results.
+	 * We leave 'exclude_from_search' as false when registering the post type
+	 * so it can work with FacetWP.
+	 *
+	 * @return  void
+	 */
+	function remove_from_search( $query ) {
+		if ( is_admin() || ! $query->is_search ) {
+			return;
+		}
+		global $wp_post_types;
+		if ( isset( $wp_post_types['testimonial'] ) ) {
+			$wp_post_types['testimonial']->exclude_from_search = true;
+		}
 	}
 
 	/**
