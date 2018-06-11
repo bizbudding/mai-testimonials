@@ -4,7 +4,7 @@
  * Plugin Name:     Mai Testimonials
  * Plugin URI:      https://maitheme.com
  * Description:     Manage and display testimonials on your website.
- * Version:         0.5.1
+ * Version:         0.5.2
  *
  * Author:          MaiTheme.com
  * Author URI:      https://maitheme.com
@@ -88,7 +88,7 @@ final class Mai_Testimonials {
 
 		// Plugin version.
 		if ( ! defined( 'MAI_TESTIMONIALS_VERSION' ) ) {
-			define( 'MAI_TESTIMONIALS_VERSION', '0.5.1' );
+			define( 'MAI_TESTIMONIALS_VERSION', '0.5.2' );
 		}
 
 		// Plugin Folder Path.
@@ -243,7 +243,7 @@ final class Mai_Testimonials {
 				'show_in_nav_menus'  => false,
 				'show_ui'            => true,
 				'rewrite'            => false,
-				'supports'           => array( 'title', 'editor', 'thumbnail' ),
+				'supports'           => array( 'title', 'editor', 'thumbnail', 'page-attributes' ), // 'page-attributes' only here for sort order, especially with Simple Page Ordering plugin.
 			)
 		) );
 
