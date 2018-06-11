@@ -1,5 +1,8 @@
 ### Changelog
 
+#### 0.5.2
+* Added: Add 'page-attributes' support to post type so it's easier to change menu order. Now works with Simple Page Ordering plugin out of the box.
+
 #### 0.5.1
 * Changed: Only run updater in the admin.
 * Fixed: Check [grid] 'content' attribute isset before checking if it's a testimonial.
