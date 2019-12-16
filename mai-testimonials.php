@@ -4,7 +4,7 @@
  * Plugin Name:     Mai Testimonials
  * Plugin URI:      https://maitheme.com
  * Description:     Manage and display testimonials on your website.
- * Version:         0.5.2
+ * Version:         0.5.3
  *
  * Author:          MaiTheme.com
  * Author URI:      https://maitheme.com
@@ -26,6 +26,8 @@ final class Mai_Testimonials {
 	 */
 	private static $instance;
 
+	private $post_type_args;
+
 	/**
 	 * Main Mai_Testimonials Instance.
 	 *
@@ -45,7 +47,8 @@ final class Mai_Testimonials {
 			self::$instance = new Mai_Testimonials;
 			// Methods
 			self::$instance->setup_constants();
-			self::$instance->init();
+			self::$instance->includes();
+			self::$instance->run();
 		}
 		return self::$instance;
 	}
@@ -88,7 +91,7 @@ final class Mai_Testimonials {
 
 		// Plugin version.
 		if ( ! defined( 'MAI_TESTIMONIALS_VERSION' ) ) {
-			define( 'MAI_TESTIMONIALS_VERSION', '0.5.2' );
+			define( 'MAI_TESTIMONIALS_VERSION', '0.5.3' );
 		}
 
 		// Plugin Folder Path.
@@ -118,8 +121,58 @@ final class Mai_Testimonials {
 
 	}
 
-	public function init() {
+	/**
+	 * Include required files.
+	 *
+	 * @access  private
+	 * @since   0.5.3
+	 * @return  void
+	 */
+	private function includes() {
+		// Include vendor libraries.
+		require_once __DIR__ . '/vendor/autoload.php';
+	}
+
+	public function run() {
+		add_action( 'init',           array( $this, 'init' ) );
 		add_action( 'plugins_loaded', array( $this, 'setup' ) );
+	}
+
+	public function init() {
+		$this->post_type_args = array(
+			'exclude_from_search' => false,
+			'has_archive'         => false,
+			'hierarchical'        => false,
+			'labels'              => array(
+				'name'                  => _x( 'Testimonials', 'testimonial general name'        , 'mai-testimonials' ),
+				'singular_name'         => _x( 'Testimonial' , 'testimonial singular name'       , 'mai-testimonials' ),
+				'menu_name'             => _x( 'Testimonials', 'testimonial admin menu'          , 'mai-testimonials' ),
+				'name_admin_bar'        => _x( 'Testimonial' , 'testimonial add new on admin bar', 'mai-testimonials' ),
+				'add_new'               => _x( 'Add New'  , 'Testimonial'                        , 'mai-testimonials' ),
+				'add_new_item'          => __( 'Add New Testimonial'                             , 'mai-testimonials' ),
+				'new_item'              => __( 'New Testimonial'                                 , 'mai-testimonials' ),
+				'edit_item'             => __( 'Edit Testimonial'                                , 'mai-testimonials' ),
+				'view_item'             => __( 'View Testimonial'                                , 'mai-testimonials' ),
+				'all_items'             => __( 'All Testimonials'                                , 'mai-testimonials' ),
+				'search_items'          => __( 'Search Testimonials'                             , 'mai-testimonials' ),
+				'parent_item_colon'     => __( 'Parent Testimonials:'                            , 'mai-testimonials' ),
+				'not_found'             => __( 'No Testimonials found.'                          , 'mai-testimonials' ),
+				'not_found_in_trash'    => __( 'No Testimonials found in Trash.'                 , 'mai-testimonials' ),
+				'featured_image'        => __( 'Testimonial Image'                               , 'mai-testimonials' ),
+				'set_featured_image'    => __( 'Set testimonial image'                           , 'mai-testimonials' ),
+				'remove_featured_image' => __( 'Remove testimonial image'                        , 'mai-testimonials' ),
+				'use_featured_image'    => __( 'Use testimonial image'                           , 'mai-testimonials' ),
+			),
+			'menu_icon'          => 'dashicons-format-quote',
+			'public'             => false,
+			'publicly_queryable' => true,
+			'show_in_menu'       => true,
+			'show_in_nav_menus'  => false,
+			'show_ui'            => true,
+			'rewrite'            => array( 'slug' => 'testimonials', 'with_front' => false ),   // This is only here for when these args are filtered and public is made true.
+			'supports'           => array( 'title', 'editor', 'thumbnail', 'page-attributes', 'genesis-cpt-archives-settings' ), // 'page-attributes' only here for sort order, especially with Simple Page Ordering plugin.
+		);
+		$this->post_type_args = apply_filters( 'mai_testimonial_args', $this->post_type_args );
 	}
 
 	public function setup() {
@@ -133,14 +186,15 @@ final class Mai_Testimonials {
 			/**
 			 * Setup the updater.
 			 *
+			 * composer require yahnis-elsts/plugin-update-checker
+			 *
 			 * @uses    https://github.com/YahnisElsts/plugin-update-checker/
 			 *
 			 * @return  void
 			 */
-			if ( ! class_exists( 'Puc_v4_Factory' ) ) {
-				require_once MAI_TESTIMONIALS_PLUGIN_DIR . 'plugin-update-checker/plugin-update-checker.php'; // 4.4
+			if ( current_user_can( 'install_plugins' ) && class_exists( 'Puc_v4_Factory' ) ) {
+				$updater = Puc_v4_Factory::buildUpdateChecker( 'https://github.com/maithemewp/mai-testimonials/', __FILE__, 'mai-testimonials' );
 			}
-			$updater = Puc_v4_Factory::buildUpdateChecker( 'https://github.com/maithemewp/mai-testimonials/', __FILE__, 'mai-testimonials' );
 		}
 
 		// Run
@@ -211,41 +265,7 @@ final class Mai_Testimonials {
 		 *  Custom Post Types  *
 		 ***********************/
 
-		register_post_type( 'testimonial',
-			apply_filters( 'mai_testimonial_args', array(
-				'exclude_from_search' => false,
-				'has_archive'         => false,
-				'hierarchical'        => false,
-				'labels'              => array(
-					'name'                  => _x( 'Testimonials', 'testimonial general name'        , 'mai-testimonials' ),
-					'singular_name'         => _x( 'Testimonial' , 'testimonial singular name'       , 'mai-testimonials' ),
-					'menu_name'             => _x( 'Testimonials', 'testimonial admin menu'          , 'mai-testimonials' ),
-					'name_admin_bar'        => _x( 'Testimonial' , 'testimonial add new on admin bar', 'mai-testimonials' ),
-					'add_new'               => _x( 'Add New'  , 'Testimonial'                        , 'mai-testimonials' ),
-					'add_new_item'          => __( 'Add New Testimonial'                             , 'mai-testimonials' ),
-					'new_item'              => __( 'New Testimonial'                                 , 'mai-testimonials' ),
-					'edit_item'             => __( 'Edit Testimonial'                                , 'mai-testimonials' ),
-					'view_item'             => __( 'View Testimonial'                                , 'mai-testimonials' ),
-					'all_items'             => __( 'All Testimonials'                                , 'mai-testimonials' ),
-					'search_items'          => __( 'Search Testimonials'                             , 'mai-testimonials' ),
-					'parent_item_colon'     => __( 'Parent Testimonials:'                            , 'mai-testimonials' ),
-					'not_found'             => __( 'No Testimonials found.'                          , 'mai-testimonials' ),
-					'not_found_in_trash'    => __( 'No Testimonials found in Trash.'                 , 'mai-testimonials' ),
-					'featured_image'        => __( 'Testimonial Image'                               , 'mai-testimonials' ),
-					'set_featured_image'    => __( 'Set testimonial image'                           , 'mai-testimonials' ),
-					'remove_featured_image' => __( 'Remove testimonial image'                        , 'mai-testimonials' ),
-					'use_featured_image'    => __( 'Use testimonial image'                           , 'mai-testimonials' ),
-				),
-				'menu_icon'          => 'dashicons-format-quote',
-				'public'             => false,
-				'publicly_queryable' => true,
-				'show_in_menu'       => true,
-				'show_in_nav_menus'  => false,
-				'show_ui'            => true,
-				'rewrite'            => false,
-				'supports'           => array( 'title', 'editor', 'thumbnail', 'page-attributes' ), // 'page-attributes' only here for sort order, especially with Simple Page Ordering plugin.
-			)
-		) );
+		register_post_type( 'testimonial', $this->post_type_args );
 
 		/***********************
 		 *  Custom Taxonomies  *
@@ -297,6 +317,10 @@ final class Mai_Testimonials {
 		if ( is_admin() || ! $query->is_search ) {
 			return;
 		}
+		// Bail if post_type is public.
+		if ( $this->post_type_args['public'] ) {
+			return;
+		}
 		global $wp_post_types;
 		if ( isset( $wp_post_types['testimonial'] ) ) {
 			$wp_post_types['testimonial']->exclude_from_search = true;
@@ -319,12 +343,17 @@ final class Mai_Testimonials {
 	}
 
 	/**
-	 * Redirect if trying to view a single testimonial,
+	 * Redirect if trying to view a single testimonial.
 	 *
 	 * @return void
 	 */
 	public function redirect() {
+		// Bail if not single testimonial.
 		if ( ! is_singular( 'testimonial' ) ) {
+			return;
+		}
+		// Bail if post_type is public.
+		if ( $this->post_type_args['public'] ) {
 			return;
 		}
 		wp_redirect( home_url() );
@@ -338,7 +367,7 @@ final class Mai_Testimonials {
 	 */
 	function metabox() {
 
-		// Initiate the metabox
+		// Initiate the metabox.
 		$cmb = new_cmb2_box( array(
 			'id'              => 'mai_testimonials',
 			'object_types'    => array( 'testimonial' ),
@@ -347,7 +376,7 @@ final class Mai_Testimonials {
 			'remove_box_wrap' => true,
 		) );
 
-		// Regular text field
+		// Regular text field.
 		$cmb->add_field( array(
 			'name'       => __( 'Byline', 'mai-testimonials' ),
 			'id'         => 'byline',
@@ -357,7 +386,7 @@ final class Mai_Testimonials {
 			),
 		) );
 
-		// URL text field
+		// URL text field.
 		$cmb->add_field( array(
 			'name'       => __( 'Website URL', 'mai-testimonials' ),
 			'id'         => 'url',
@@ -594,7 +623,7 @@ final class Mai_Testimonials {
 		$url = get_post_meta( get_the_ID(), 'url', true );
 		if ( $url ) {
 			$url = esc_url( $url );
-			$entry_header .= sprintf( '<span class="url"><a href="%s" itemprop="url">%s</a></span>', $url, $url );
+			$entry_header .= sprintf( '<span class="url"><a href="%s" target="_blank" rel="noopener" itemprop="url">%s</a></span>', $url, $url );
 		}
 		return $entry_header;
 	}

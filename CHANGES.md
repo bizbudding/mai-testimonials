@@ -1,5 +1,9 @@
 ### Changelog
 
+#### 0.5.3 (12/16/19)
+* Changed: Open website links in new tab.
+* Changed: Update the updater.
+
 #### 0.5.2
 * Added: Add 'page-attributes' support to post type so it's easier to change menu order. Now works with Simple Page Ordering plugin out of the box.
 
@@ -17,4 +21,4 @@
 * Fixed: Constant name referencing Mai Favorites.
 
 #### 0.3.0
-* Added: Testimonial Categories to allow displaying testimonials in a specific category via [grid content="testimonial" taxonomy="testimonial_cat" term="123"].
+* Added: Testimonial Categories to allow displaying testimonials in a specific category via [grid content="testimonial" taxonomy="testimonial_cat" terms="123"].
