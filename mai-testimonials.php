@@ -99,10 +99,15 @@ final class Mai_Testimonials {
 			define( 'MAI_TESTIMONIALS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 		}
 
-		// Plugin Includes Path
-		if ( ! defined( 'MAI_TESTIMONIALS_INCLUDES_DIR' ) ) {
-			define( 'MAI_TESTIMONIALS_INCLUDES_DIR', MAI_TESTIMONIALS_PLUGIN_DIR . 'includes/' );
+		// Plugin Classes Path.
+		if ( ! defined( 'MAI_TESTIMONIALS_CLASSES_DIR' ) ) {
+			define( 'MAI_TESTIMONIALS_CLASSES_DIR', MAI_TESTIMONIALS_PLUGIN_DIR . 'classes/' );
 		}
+
+		// Plugin Includes Path.
+		// if ( ! defined( 'MAI_TESTIMONIALS_INCLUDES_DIR' ) ) {
+		// 	define( 'MAI_TESTIMONIALS_INCLUDES_DIR', MAI_TESTIMONIALS_PLUGIN_DIR . 'includes/' );
+		// }
 
 		// Plugin Folder URL.
 		if ( ! defined( 'MAI_TESTIMONIALS_PLUGIN_URL' ) ) {
@@ -132,7 +137,7 @@ final class Mai_Testimonials {
 		// Include vendor libraries.
 		require_once __DIR__ . '/vendor/autoload.php';
 		// Includes.
-		foreach ( glob( MAI_TESTIMONIALS_INCLUDES_DIR . '*.php' ) as $file ) { include $file; }
+		foreach ( glob( MAI_TESTIMONIALS_CLASSES_DIR . '*.php' ) as $file ) { include $file; }
 	}
 
 	public function run() {
@@ -248,7 +253,6 @@ final class Mai_Testimonials {
 		add_filter( 'enter_title_here',                       [ $this, 'enter_title_text' ] );
 		add_action( 'add_meta_boxes',                         [ $this, 'add_meta_box' ] );
 		add_action( 'save_post_testimonial',                  [ $this, 'save_meta_box' ] );
-		add_action( 'template_redirect',                      [ $this, 'redirect' ] );
 	}
 
 	public function activate() {
@@ -454,26 +458,6 @@ final class Mai_Testimonials {
 		// Update the meta fields.
 		update_post_meta( $post_id, 'url', esc_url( $_POST['maitestimonials_url'] ) );
 		update_post_meta( $post_id, 'byline', sanitize_text_field( $_POST['maitestimonials_byline'] ) );
-	}
-
-	/**
-	 * Redirect if trying to view a single testimonial.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return void
-	 */
-	public function redirect() {
-		// Bail if not single testimonial.
-		if ( ! is_singular( 'testimonial' ) ) {
-			return;
-		}
-		// Bail if post_type is public.
-		if ( $this->post_type_args['public'] ) {
-			return;
-		}
-		wp_redirect( home_url() );
-		exit();
 	}
 }
 
