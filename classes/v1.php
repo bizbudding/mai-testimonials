@@ -3,8 +3,6 @@
 class Mai_Testimonials_v1 {
 
 	function __construct() {
-		add_action( 'cmb2_admin_init',            [ $this, 'metabox' ] );
-		add_action( 'current_screen',             [ $this, 'maybe_do_admin_functions' ] );
 		add_action( 'wp_enqueue_scripts',         [ $this, 'css' ], 1000 ); // Way late cause Engine changes stylesheet to 999.
 		add_filter( 'shortcode_atts_grid',        [ $this, 'grid_atts' ], 8, 3 );
 		add_filter( 'genesis_attr_flex-entry',    [ $this, 'flex_entry_atts' ], 12, 3 );
@@ -12,104 +10,6 @@ class Mai_Testimonials_v1 {
 		add_filter( 'genesis_attr_entry-header',  [ $this, 'entry_header_atts' ], 12, 3 );
 		add_filter( 'genesis_attr_entry-title',   [ $this, 'entry_title_atts' ], 12, 3 );
 		add_filter( 'mai_flex_entry_header',      [ $this, 'add_author_details' ], 10, 2 );
-	}
-
-	/**
-	 * Define the metabox and field configurations.
-	 *
-	 * @return void
-	 */
-	function metabox() {
-
-		// Initiate the metabox.
-		$cmb = new_cmb2_box( array(
-			'id'              => 'mai_testimonials',
-			'object_types'    => array( 'testimonial' ),
-			'context'         => 'after_title',
-			'show_names'      => true,
-			'remove_box_wrap' => true,
-		) );
-
-		// Regular text field.
-		$cmb->add_field( array(
-			'name'       => __( 'Byline', 'mai-testimonials' ),
-			'id'         => 'byline',
-			'type'       => 'text',
-			'attributes' => array(
-				'placeholder' => __( 'CEO of Mai Theme', 'mai-testimonials' ),
-			),
-		) );
-
-		// URL text field.
-		$cmb->add_field( array(
-			'name'       => __( 'Website URL', 'mai-testimonials' ),
-			'id'         => 'url',
-			'type'       => 'text_url',
-			'before'     => '<span class="dashicons dashicons-admin-links"></span>',
-			'attributes' => array(
-				'placeholder' => 'https://maitheme.com',
-			),
-		) );
-	}
-
-	/**
-	 * Maybe add custom CSS and filter the metabox text.
-	 *
-	 * @return  void
-	 */
-	function maybe_do_admin_functions() {
-		$screen = get_current_screen();
-		if ( 'testimonial' !== $screen->post_type ) {
-			return;
-		}
-		add_action( 'admin_head', array( $this, 'admin_css' ) );
-	}
-
-	/**
-	 * Add custom CSS to <head>
-	 *
-	 * @since  1.0.0
-	 *
-	 * @return void
-	 */
-	function admin_css() {
-		echo '<style type="text/css">
-			.cmb2-context-wrap.cmb2-context-wrap-mai_testimonials {
-				margin-top: 16px;
-			}
-			#cmb2-metabox-mai_testimonials .cmb-td {
-				display: -webkit-box;display: -ms-flexbox;display: flex;
-				-ms-flex-wrap: wrap;flex-wrap: wrap;
-				flex: 1 1 100%;
-				width: 100%;
-				max-width: 100%;
-			}
-			#cmb2-metabox-mai_testimonials input {
-				-webkit-box-flex: 1;-ms-flex: 1 1 auto;flex: 1 1 auto;
-			}
-			#cmb2-metabox-mai_testimonials input:focus::-webkit-input-placeholder { color:transparent; }
-			#cmb2-metabox-mai_testimonials input:focus:-moz-placeholder { color:transparent; }
-			#cmb2-metabox-mai_testimonials input:focus::-moz-placeholder { color:transparent; }
-			#cmb2-metabox-mai_testimonials input:focus:-ms-input-placeholder { color:transparent; }
-			#cmb2-metabox-mai_testimonials .dashicons {
-				height: auto;
-				background: #f5f5f5;
-				color: #666;
-				font-size: 18px;
-				line-height: 18px;
-				padding: 5px 3px 2px;
-				margin: 1px -2px 1px 0;
-				border: 1px solid #ddd;
-			}
-			#cmb2-metabox-mai_testimonials .cmb2-metabox-description {
-				-webkit-box-flex: 1;-ms-flex: 1 0 100%;flex: 1 0 100%;
-				font-size: 12px;
-				font-style: normal;
-				margin: 4px 0 0;
-				padding: 0;
-			}
-		}
-		</style>';
 	}
 
 	/**
