@@ -2,12 +2,12 @@
 
 /**
  * Plugin Name:     Mai Testimonials
- * Plugin URI:      https://maitheme.com
+ * Plugin URI:      https://bizbudding.com/products/mai-testimonials/
  * Description:     Manage and display testimonials on your website.
- * Version:         0.5.3
+ * Version:         2.0.0
  *
- * Author:          MaiTheme.com
- * Author URI:      https://maitheme.com
+ * Author:          BizBudding Inc.
+ * Author URI:      https://bizbudding.com/
  */
 
 // Exit if accessed directly.
@@ -91,7 +91,7 @@ final class Mai_Testimonials {
 
 		// Plugin version.
 		if ( ! defined( 'MAI_TESTIMONIALS_VERSION' ) ) {
-			define( 'MAI_TESTIMONIALS_VERSION', '0.5.3' );
+			define( 'MAI_TESTIMONIALS_VERSION', '2.0.0' );
 		}
 
 		// Plugin Folder Path.
@@ -99,10 +99,15 @@ final class Mai_Testimonials {
 			define( 'MAI_TESTIMONIALS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 		}
 
-		// Plugin Includes Path
-		if ( ! defined( 'MAI_TESTIMONIALS_INCLUDES_DIR' ) ) {
-			define( 'MAI_TESTIMONIALS_INCLUDES_DIR', MAI_TESTIMONIALS_PLUGIN_DIR . 'includes/' );
+		// Plugin Classes Path.
+		if ( ! defined( 'MAI_TESTIMONIALS_CLASSES_DIR' ) ) {
+			define( 'MAI_TESTIMONIALS_CLASSES_DIR', MAI_TESTIMONIALS_PLUGIN_DIR . 'classes/' );
 		}
+
+		// Plugin Includes Path.
+		// if ( ! defined( 'MAI_TESTIMONIALS_INCLUDES_DIR' ) ) {
+		// 	define( 'MAI_TESTIMONIALS_INCLUDES_DIR', MAI_TESTIMONIALS_PLUGIN_DIR . 'includes/' );
+		// }
 
 		// Plugin Folder URL.
 		if ( ! defined( 'MAI_TESTIMONIALS_PLUGIN_URL' ) ) {
@@ -131,19 +136,54 @@ final class Mai_Testimonials {
 	private function includes() {
 		// Include vendor libraries.
 		require_once __DIR__ . '/vendor/autoload.php';
+		// Includes.
+		foreach ( glob( MAI_TESTIMONIALS_CLASSES_DIR . '*.php' ) as $file ) { include $file; }
 	}
 
 	public function run() {
-		add_action( 'init',           array( $this, 'init' ) );
-		add_action( 'plugins_loaded', array( $this, 'setup' ) );
+		add_action( 'admin_init',        [ $this, 'updater' ] );
+		add_action( 'init',              [ $this, 'init' ] );
+		add_action( 'after_setup_theme', [ $this, 'setup' ] ); // plugins_loaded was too early to check for 'mai-engine'.
+	}
+
+	/**
+	 * Setup the updater.
+	 *
+	 * composer require yahnis-elsts/plugin-update-checker
+	 *
+	 * @since 0.1.0
+	 *
+	 * @uses https://github.com/YahnisElsts/plugin-update-checker/
+	 *
+	 * @return void
+	 */
+	public function updater() {
+
+		// Bail if current user cannot manage plugins.
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			return;
+		}
+
+		// Bail if plugin updater is not loaded.
+		if ( ! class_exists( 'Puc_v4_Factory' ) ) {
+			return;
+		}
+
+		// Setup the updater.
+		$updater = Puc_v4_Factory::buildUpdateChecker( 'https://github.com/maithemewp/mai-testimonials/', __FILE__, 'mai-testimonials' );
+
+		// Maybe set github api token.
+		if ( defined( 'MAI_GITHUB_API_TOKEN' ) ) {
+			$updater->setAuthentication( MAI_GITHUB_API_TOKEN );
+		}
 	}
 
 	public function init() {
-		$this->post_type_args = array(
+		$this->post_type_args = [
 			'exclude_from_search' => false,
 			'has_archive'         => false,
 			'hierarchical'        => false,
-			'labels'              => array(
+			'labels'              => [
 				'name'                  => _x( 'Testimonials', 'testimonial general name'        , 'mai-testimonials' ),
 				'singular_name'         => _x( 'Testimonial' , 'testimonial singular name'       , 'mai-testimonials' ),
 				'menu_name'             => _x( 'Testimonials', 'testimonial admin menu'          , 'mai-testimonials' ),
@@ -162,47 +202,40 @@ final class Mai_Testimonials {
 				'set_featured_image'    => __( 'Set testimonial image'                           , 'mai-testimonials' ),
 				'remove_featured_image' => __( 'Remove testimonial image'                        , 'mai-testimonials' ),
 				'use_featured_image'    => __( 'Use testimonial image'                           , 'mai-testimonials' ),
-			),
+			],
 			'menu_icon'          => 'dashicons-format-quote',
 			'public'             => false,
 			'publicly_queryable' => true,
 			'show_in_menu'       => true,
 			'show_in_nav_menus'  => false,
 			'show_ui'            => true,
-			'rewrite'            => array( 'slug' => 'testimonials', 'with_front' => false ),   // This is only here for when these args are filtered and public is made true.
-			'supports'           => array( 'title', 'editor', 'thumbnail', 'page-attributes', 'genesis-cpt-archives-settings' ), // 'page-attributes' only here for sort order, especially with Simple Page Ordering plugin.
-		);
+			'rewrite'            => [ 'slug' => 'testimonials', 'with_front' => false ],   // This is only here for when these args are filtered and public is made true.
+			'supports'           => [ 'title', 'editor', 'thumbnail', 'page-attributes', 'genesis-cpt-archives-settings' ], // 'page-attributes' only here for sort order, especially with Simple Page Ordering plugin.
+		];
 		$this->post_type_args = apply_filters( 'mai_testimonial_args', $this->post_type_args );
 	}
 
 	public function setup() {
 		// Bail if CMB2 is not running anywhere.
-		if ( ! defined( 'CMB2_LOADED' ) ) {
-			add_action( 'admin_init',    array( $this, 'deactivate_plugin' ) );
-			add_action( 'admin_notices', array( $this, 'admin_notice' ) );
+		if ( ! ( class_exists( 'Mai_Theme_Engine' ) || current_theme_supports( 'mai-engine' ) ) ) {
+			add_action( 'admin_init',    [ $this, 'deactivate_plugin' ] );
+			add_action( 'admin_notices', [ $this, 'admin_notice' ] );
 			return;
-		}
-		if ( is_admin() ) {
-			/**
-			 * Setup the updater.
-			 *
-			 * composer require yahnis-elsts/plugin-update-checker
-			 *
-			 * @uses    https://github.com/YahnisElsts/plugin-update-checker/
-			 *
-			 * @return  void
-			 */
-			if ( current_user_can( 'install_plugins' ) && class_exists( 'Puc_v4_Factory' ) ) {
-				$updater = Puc_v4_Factory::buildUpdateChecker( 'https://github.com/maithemewp/mai-testimonials/', __FILE__, 'mai-testimonials' );
-			}
 		}
 
 		// Run
 		$this->hooks();
+
+		// Version specific files.
+		if ( class_exists( 'Mai_Theme_Engine' ) ) {
+			$v1 = new Mai_Testimonials_v1;
+		} elseif ( current_theme_supports( 'mai-engine' ) ) {
+			$v2 = new Mai_Testimonials_v2;
+		}
 	}
 
 	function admin_notice() {
-		printf( '<div class="notice notice-warning is-dismissible"><p>%s</p></div>', __( 'Mai Testimonials requires the Mai Theme Engine plugin or CMB2 plugin in order to run. As a result, this plugin has been deactivated.', 'mai-testimonials' ) );
+		printf( '<div class="notice notice-warning is-dismissible"><p>%s</p></div>', __( 'Mai Testimonials requires Mai Theme and it\'s Engine plugin in order to run. As a result, this plugin has been deactivated.', 'mai-testimonials' ) );
 		if ( isset( $_GET['activate'] ) ) {
 			unset( $_GET['activate'] );
 		}
@@ -210,27 +243,16 @@ final class Mai_Testimonials {
 
 	public function hooks() {
 
-		register_activation_hook(   __FILE__, array( $this, 'activate' ) );
+		register_activation_hook(   __FILE__, [ $this, 'activate' ] );
 		register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
 
-		add_action( 'init',                                   array( $this, 'register_content_types' ) );
-		add_filter( 'pre_get_posts',                          array( $this, 'remove_from_search' ) );
-		add_filter( 'enter_title_here',                       array( $this, 'enter_title_text' ) );
-		add_action( 'template_redirect',                      array( $this, 'redirect' ) );
-		add_action( 'cmb2_admin_init',                        array( $this, 'metabox' ) );
-		add_action( 'current_screen',                         array( $this, 'maybe_do_admin_functions' ) );
-		add_action( 'wp_enqueue_scripts',                     array( $this, 'css' ), 1000 ); // Way late cause Engine changes stylesheet to 999.
-
-		add_filter( 'manage_testimonial_posts_columns',       array( $this, 'cols' ) );
-		add_action( 'manage_testimonial_posts_custom_column', array( $this, 'col' ) );
-
-		add_filter( 'shortcode_atts_grid',                    array( $this, 'grid_atts' ), 8, 3 );
-		add_filter( 'genesis_attr_flex-entry',                array( $this, 'flex_entry_atts'), 12, 3 );
-		add_filter( 'genesis_attr_entry-content',             array( $this, 'entry_content_atts'), 12, 3 );
-		add_filter( 'genesis_attr_entry-header',              array( $this, 'entry_header_atts'), 12, 3 );
-		add_filter( 'genesis_attr_entry-title',               array( $this, 'entry_title_atts'), 12, 3 );
-		add_filter( 'mai_flex_entry_header',                  array( $this, 'add_author_details' ), 10, 2 );
-
+		add_action( 'init',                                   [ $this, 'register_content_types' ] );
+		add_filter( 'pre_get_posts',                          [ $this, 'remove_from_search' ] );
+		add_filter( 'manage_testimonial_posts_columns',       [ $this, 'cols' ] );
+		add_action( 'manage_testimonial_posts_custom_column', [ $this, 'col' ] );
+		add_filter( 'enter_title_here',                       [ $this, 'enter_title_text' ] );
+		add_action( 'add_meta_boxes',                         [ $this, 'add_meta_box' ] );
+		add_action( 'save_post_testimonial',                  [ $this, 'save_meta_box' ] );
 	}
 
 	public function activate() {
@@ -240,23 +262,6 @@ final class Mai_Testimonials {
 
 	function deactivate_plugin() {
 		deactivate_plugins( plugin_basename( __FILE__ ) );
-	}
-
-	function cols( $cols ) {
-		$date = $cols['date'];
-		$cats = $cols['taxonomy-testimonial_cat'];
-		unset( $cols['date'] );
-		unset( $cols['taxonomy-testimonial_cat'] );
-		$cols['testimonial_excerpt']      = 'Excerpt';
-		$cols['taxonomy-testimonial_cat'] = $cats;
-		$cols['date']                     = $date;
-		return $cols;
-	}
-
-	function col( $col ) {
-		if ( 'testimonial_excerpt' === $col ) {
-			echo esc_html( get_the_excerpt() );
-		}
 	}
 
 	public function register_content_types() {
@@ -311,6 +316,8 @@ final class Mai_Testimonials {
 	 * We leave 'exclude_from_search' as false when registering the post type
 	 * so it can work with FacetWP.
 	 *
+	 * @since 0.1.0
+	 *
 	 * @return  void
 	 */
 	function remove_from_search( $query ) {
@@ -327,8 +334,27 @@ final class Mai_Testimonials {
 		}
 	}
 
+	function cols( $cols ) {
+		$date = $cols['date'];
+		$cats = $cols['taxonomy-testimonial_cat'];
+		unset( $cols['date'] );
+		unset( $cols['taxonomy-testimonial_cat'] );
+		$cols['testimonial_excerpt']      = __( 'Excerpt', 'mai-testimonials' );
+		$cols['taxonomy-testimonial_cat'] = $cats;
+		$cols['date']                     = $date;
+		return $cols;
+	}
+
+	function col( $col ) {
+		if ( 'testimonial_excerpt' === $col ) {
+			echo esc_html( get_the_excerpt() );
+		}
+	}
+
 	/**
 	 * Change the enter title here text.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @param  string  $title  The existing title placeholder.
 	 *
@@ -343,304 +369,96 @@ final class Mai_Testimonials {
 	}
 
 	/**
-	 * Redirect if trying to view a single testimonial.
+	 * Render Meta Box content.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string $post_type The post type.
 	 *
 	 * @return void
 	 */
-	public function redirect() {
-		// Bail if not single testimonial.
-		if ( ! is_singular( 'testimonial' ) ) {
+	function add_meta_box( $post_type ) {
+		if ( 'testimonial' !== $post_type ) {
 			return;
 		}
-		// Bail if post_type is public.
-		if ( $this->post_type_args['public'] ) {
-			return;
-		}
-		wp_redirect( home_url() );
-		exit();
+
+		add_meta_box(
+			'maitestimonials_meta_box',
+			esc_html__( 'Testimonial Info', 'mai-testimonials' ),
+			[ $this, 'render_meta_box' ],
+			$post_type,
+			'normal',
+			'high'
+		);
 	}
 
+
 	/**
-	 * Define the metabox and field configurations.
+	 * Render Meta Box content.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param WP_Post $post The post object.
 	 *
 	 * @return void
 	 */
-	function metabox() {
+	function render_meta_box( $post ) {
 
-		// Initiate the metabox.
-		$cmb = new_cmb2_box( array(
-			'id'              => 'mai_testimonials',
-			'object_types'    => array( 'testimonial' ),
-			'context'         => 'after_title',
-			'show_names'      => true,
-			'remove_box_wrap' => true,
-		) );
+		// Add an nonce field so we can check for it later.
+		wp_nonce_field( 'maitestimonials_meta_box', 'maitestimonials_meta_box_nonce' );
 
-		// Regular text field.
-		$cmb->add_field( array(
-			'name'       => __( 'Byline', 'mai-testimonials' ),
-			'id'         => 'byline',
-			'type'       => 'text',
-			'attributes' => array(
-				'placeholder' => __( 'CEO of Mai Theme', 'mai-testimonials' ),
-			),
-		) );
+		// Use get_post_meta to retrieve an existing value from the database.
+		$byline = get_post_meta( $post->ID, 'byline', true );
+		$url    = get_post_meta( $post->ID, 'url', true );
 
-		// URL text field.
-		$cmb->add_field( array(
-			'name'       => __( 'Website URL', 'mai-testimonials' ),
-			'id'         => 'url',
-			'type'       => 'text_url',
-			'before'     => '<span class="dashicons dashicons-admin-links"></span>',
-			'attributes' => array(
-				'placeholder' => 'https://maitheme.com',
-			),
-		) );
+		// Display the form, using the current value.
+		printf( '<p style="margin-bottom:4px;"><label for="maitestimonials_byline">%s</label></p>', esc_html__( 'Byline', 'mai-testimonials' ) );
+		printf( '<input style="display:block;width:100%%;margin-bottom:1em;" type="text" id="maitestimonials_byline" name="maitestimonials_byline" value="%s" placeholder="%s" />', esc_attr( $byline ), esc_html__( 'CEO of Mai Theme', 'mai-testimonials' ) );
+		printf( '<p style="margin-bottom:4px;"><label for="maitestimonials_url">%s</label></p>', esc_html__( 'Website URL', 'mai-testimonials' ) );
+		printf( '<input style="display:block;width:100%%;" type="url" id="maitestimonials_url" name="maitestimonials_url" value="%s" placeholder="%s"/>', esc_attr( $url ), __( 'Enter URL here', 'mai-testimonials' ) );
 	}
 
 	/**
-	 * Maybe add custom CSS and filter the metabox text.
+	 * Save the meta when the post is saved.
+	 * We need to verify this came from the our screen and with proper authorization,
+	 * because save_post can be triggered at other times.*
 	 *
-	 * @return  void
+	 * @since 2.0.0
+	 *
+	 * @param int $post_id The ID of the post being saved.
+	 *
+	 * @return int
 	 */
-	function maybe_do_admin_functions() {
-		$screen = get_current_screen();
-		if ( 'testimonial' !== $screen->post_type ) {
-			return;
+	function save_meta_box( $post_id ) {
+		// Check if our nonce is set.
+		if ( ! isset( $_POST['maitestimonials_meta_box_nonce'] ) ) {
+			return $post_id;
 		}
-		add_action( 'admin_head', array( $this, 'admin_css' ) );
+
+		// Verify that the nonce is valid.
+		if ( ! wp_verify_nonce( $_POST['maitestimonials_meta_box_nonce'], 'maitestimonials_meta_box' ) ) {
+			return $post_id;
+		}
+
+		// Bail if an autosave.
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			return $post_id;
+		}
+
+		// Check the user's permissions.
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return $post_id;
+		}
+
+		// Check if there was a multisite switch before.
+		if ( is_multisite() && ms_is_switched() ) {
+			return $post_id;
+		}
+
+		// Update the meta fields.
+		update_post_meta( $post_id, 'url', esc_url( $_POST['maitestimonials_url'] ) );
+		update_post_meta( $post_id, 'byline', sanitize_text_field( $_POST['maitestimonials_byline'] ) );
 	}
-
-	/**
-	 * Add custom CSS to <head>
-	 *
-	 * @since  1.0.0
-	 *
-	 * @return void
-	 */
-	function admin_css() {
-		echo '<style type="text/css">
-			.cmb2-context-wrap.cmb2-context-wrap-mai_testimonials {
-				margin-top: 16px;
-			}
-			#cmb2-metabox-mai_testimonials .cmb-td {
-				display: -webkit-box;display: -ms-flexbox;display: flex;
-				-ms-flex-wrap: wrap;flex-wrap: wrap;
-				flex: 1 1 100%;
-				width: 100%;
-				max-width: 100%;
-			}
-			#cmb2-metabox-mai_testimonials input {
-				-webkit-box-flex: 1;-ms-flex: 1 1 auto;flex: 1 1 auto;
-			}
-			#cmb2-metabox-mai_testimonials input:focus::-webkit-input-placeholder { color:transparent; }
-			#cmb2-metabox-mai_testimonials input:focus:-moz-placeholder { color:transparent; }
-			#cmb2-metabox-mai_testimonials input:focus::-moz-placeholder { color:transparent; }
-			#cmb2-metabox-mai_testimonials input:focus:-ms-input-placeholder { color:transparent; }
-			#cmb2-metabox-mai_testimonials .dashicons {
-				height: auto;
-				background: #f5f5f5;
-				color: #666;
-				font-size: 18px;
-				line-height: 18px;
-				padding: 5px 3px 2px;
-				margin: 1px -2px 1px 0;
-				border: 1px solid #ddd;
-			}
-			#cmb2-metabox-mai_testimonials .cmb2-metabox-description {
-				-webkit-box-flex: 1;-ms-flex: 1 0 100%;flex: 1 0 100%;
-				font-size: 12px;
-				font-style: normal;
-				margin: 4px 0 0;
-				padding: 0;
-			}
-		}
-		</style>';
-	}
-
-	/**
-	 * Add inline CSS.
-	 *
-	 * @since 0.5.0
-	 *
-	 * @link  http://www.billerickson.net/code/enqueue-inline-styles/
-	 * @link  https://sridharkatakam.com/chevron-shaped-featured-parallax-section-in-genesis-using-clip-path/
-	 */
-	function css() {
-		$css = '
-			.flex-entry.testimonial {
-				background-color: transparent;
-				border-radius: 5px;
-			}
-			.mai-slider[data-slidestoshow="1"] .flex-entry.testimonial.slick-slide {
-				border: none;
-				-webkit-box-shadow: none;
-				box-shadow: none;
-			}
-			.flex-entry.testimonial .entry-header {
-				-webkit-box-ordinal-group: 3;-ms-flex-order: 2;order: 2;
-				padding-top: 12px;
-			}
-			.flex-entry.testimonial .entry-header span {
-				display: inline-block;
-			}
-			.flex-entry.testimonial .entry-header .entry-title,
-			.flex-entry.testimonial .entry-header .title {
-				font-size: 1.2rem;
-			}
-			.flex-entry.testimonial .entry-header .entry-title {
-				font-weight: bold;
-			}
-			.flex-entry.testimonial .entry-header .title {
-				font-size: 1rem;
-			}
-			.flex-entry.testimonial .entry-header .title::before {
-				display: inline-block;
-				content: "-";
-				margin: 0 6px;
-			}
-			.flex-entry.testimonial .entry-header .url {
-				display: block;
-				font-size: 1rem;
-			}
-			.flex-entry.testimonial .entry-content {
-				font-style: italic;
-				letter-spacing: 1px;
-			}
-			.flex-entry.testimonial .entry-image-link {
-				max-width: 120px;
-				border-radius: 50%;
-				overflow: hidden;
-			}
-			/* offset negative margin */
-			.flex-entry.testimonial .entry-image-link.entry-image-before-entry.alignnone {
-				width: auto;
-				margin-left: auto;
-				margin-right: auto;
-			}
-		';
-		$handle = ( defined( 'CHILD_THEME_NAME' ) && CHILD_THEME_NAME ) ? sanitize_title_with_dashes( CHILD_THEME_NAME ) : 'child-theme';
-		wp_add_inline_style( $handle, $css );
-	}
-
-	/**
-	 * Filter the default args for [grid] shortcode when displaying testimonials.
-	 *
-	 * @param   array  $out    The modified attributes.
-	 * @param   array  $pairs  Entire list of supported attributes and their defaults.
-	 * @param   array  $atts   User defined attributes in shortcode tag.
-	 *
-	 * @return  array  The modified attributes.
-	 */
-	function grid_atts( $out, $pairs, $atts ) {
-
-		// Bail if not a testimonial.
-		if ( ! isset( $atts['content'] ) || 'testimonial' !== $atts['content'] ) {
-			return $out;
-		}
-
-		if ( ! isset( $atts['align'] ) ) {
-			$out['align'] = 'center, middle';
-		}
-
-		if ( ! isset( $atts['boxed'] ) ) {
-			$out['boxed'] = false;
-		}
-
-		if ( ! isset( $atts['columns'] ) ) {
-			$out['columns'] = 2;
-		}
-
-		if ( ! isset( $atts['image_size'] ) ) {
-			$out['image_size'] = 'thumbnail';
-		}
-
-		if ( ! isset( $atts['link'] ) ) {
-			$out['link'] = false;
-		}
-
-		if ( ! isset( $atts['show'] ) ) {
-			$out['show'] = 'image, title, content';
-		}
-
-		if ( ! isset( $atts['title_wrap'] ) ) {
-			$out['title_wrap'] = 'span';
-		}
-
-		return $out;
-	}
-
-	function flex_entry_atts( $attributes, $context, $atts ) {
-		// Bail if not a testimonial.
-		if ( ! $this->is_testimonial( $atts ) ) {
-			return $attributes;
-		}
-		$attributes['itemprop'] = 'review';
-		$attributes['itemtype'] = 'http://schema.org/Review';
-		return $attributes;
-	}
-
-	function entry_content_atts( $attributes, $context, $atts ) {
-		// Bail if not a testimonial.
-		if ( ! $this->is_testimonial( $atts ) ) {
-			return $attributes;
-		}
-		$attributes['class']   .= ' text-lg';
-		$attributes['itemprop'] = 'reviewBody';
-		return $attributes;
-	}
-
-	function entry_header_atts( $attributes, $context, $atts ) {
-		// Bail if not a testimonial.
-		if ( ! $this->is_testimonial( $atts ) ) {
-			return $attributes;
-		}
-		$attributes['itemprop'] = 'author';
-		$attributes['itemtype'] = 'http://schema.org/Person';
-		return $attributes;
-	}
-
-	function entry_title_atts( $attributes, $context, $atts ) {
-		// Bail if not a testimonial.
-		if ( ! $this->is_testimonial( $atts ) ) {
-			return $attributes;
-		}
-		$attributes['itemprop'] = 'name';
-		return $attributes;
-	}
-
-	function add_author_details( $entry_header, $atts ) {
-		// Bail if not a testimonial.
-		if ( ! $this->is_testimonial( $atts ) ) {
-			return $entry_header;
-		}
-		// Byline
-		$byline = get_post_meta( get_the_ID(), 'byline', true );
-		if ( $byline ) {
-			$entry_header .= sprintf( '<span class="title" itemprop="jobTitle">%s</span>', sanitize_text_field( $byline ) );
-		}
-		// URL
-		$url = get_post_meta( get_the_ID(), 'url', true );
-		if ( $url ) {
-			$url = esc_url( $url );
-			$entry_header .= sprintf( '<span class="url"><a href="%s" target="_blank" rel="noopener" itemprop="url">%s</a></span>', $url, $url );
-		}
-		return $entry_header;
-	}
-
-	function is_testimonial( $atts ) {
-		// Bail if we have no atts.
-		if ( ! isset( $atts ) || ! is_array( $atts ) ) {
-			return false;
-		}
-		// Bail if not a testimonial.
-		if ( ! isset( $atts['content'] ) || ! in_array( 'testimonial', (array) $atts['content'] ) ) {
-			return false;
-		}
-		// Yay, a testimonial.
-		return true;
-	}
-
 }
 
 /**
