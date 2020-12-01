@@ -2,12 +2,12 @@
 
 /**
  * Plugin Name:     Mai Testimonials
- * Plugin URI:      https://maitheme.com
+ * Plugin URI:      https://bizbudding.com/products/mai-testimonials/
  * Description:     Manage and display testimonials on your website.
- * Version:         0.5.3
+ * Version:         2.0.0
  *
- * Author:          MaiTheme.com
- * Author URI:      https://maitheme.com
+ * Author:          BizBudding Inc.
+ * Author URI:      https://bizbudding.com/
  */
 
 // Exit if accessed directly.
@@ -91,7 +91,7 @@ final class Mai_Testimonials {
 
 		// Plugin version.
 		if ( ! defined( 'MAI_TESTIMONIALS_VERSION' ) ) {
-			define( 'MAI_TESTIMONIALS_VERSION', '0.5.3' );
+			define( 'MAI_TESTIMONIALS_VERSION', '2.0.0' );
 		}
 
 		// Plugin Folder Path.
