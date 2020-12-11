@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.1 (12/11/20)
+* Changd: Plugin header consistency.
+
 ## 2.0.0 (12/1/20)
 * Added: Support for Mai Theme v2.
 
