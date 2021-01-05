@@ -4,6 +4,7 @@ class Mai_Testimonials_v2 {
 
 	function __construct() {
 		add_filter( 'mai_grid_post_types',                [ $this, 'post_types' ], 10, 3 );
+		add_filter( 'mai_link_entry',                     [ $this, 'link_entry' ], 10, 3 );
 		add_filter( 'genesis_markup_entry_close',         [ $this, 'entry_schema' ], 10, 2 );
 		add_filter( 'genesis_markup_entry-title_content', [ $this, 'do_author_info' ], 10, 2 );
 		add_filter( 'genesis_attr_entry',                 [ $this, 'remove_schema' ], 12, 3 );
@@ -24,6 +25,27 @@ class Mai_Testimonials_v2 {
 	function post_types( $post_types ) {
 		$post_types[] = 'testimonial';
 		return array_unique( $post_types );
+	}
+
+	/**
+	 * Determines whether the entry should be linked or not.
+	 *
+	 * @since 2.0.2
+	 *
+	 * @return bool
+	 */
+	function link_entry( $link_entry, $args, $entry ) {
+		if ( 'WP_Post' !== get_class( $entry ) ) {
+			return $link_entry;
+		}
+
+		if ( 'testimonial' !== $entry->post_type ) {
+			return $link_entry;
+		}
+
+		$post_type = get_post_type_object( 'testimonial' );
+
+		return $post_type->public;
 	}
 
 	/**

@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.2 (1/5/21)
+* Fixed: Mai Post Grid block still linking testimonials when post type is private.
+
 ## 2.0.1 (12/11/20)
 * Changd: Plugin header consistency.
 
