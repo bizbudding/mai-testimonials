@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.3 (2/13/21)
+* Added: Mai logo icon to updater.
+
 ## 2.0.2 (1/5/21)
 * Fixed: Mai Post Grid block still linking testimonials when post type is private.
 
