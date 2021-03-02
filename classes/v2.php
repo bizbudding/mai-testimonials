@@ -5,6 +5,7 @@ class Mai_Testimonials_v2 {
 	function __construct() {
 		add_filter( 'mai_grid_post_types',                [ $this, 'post_types' ], 10, 3 );
 		add_filter( 'mai_link_entry',                     [ $this, 'link_entry' ], 10, 3 );
+		add_filter( 'mai_entry_content',                  [ $this, 'entry_content' ], 10, 3 );
 		add_filter( 'genesis_markup_entry_close',         [ $this, 'entry_schema' ], 10, 2 );
 		add_filter( 'genesis_markup_entry-title_content', [ $this, 'do_author_info' ], 10, 2 );
 		add_filter( 'genesis_attr_entry',                 [ $this, 'remove_schema' ], 12, 3 );
@@ -45,7 +46,27 @@ class Mai_Testimonials_v2 {
 
 		$post_type = get_post_type_object( 'testimonial' );
 
-		return $post_type->public;
+		return (bool) $post_type->public;
+	}
+
+
+	/**
+	 * Show full block content on testimonials.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @return bool
+	 */
+	function entry_content( $entry_content, $args, $entry ) {
+		if ( 'WP_Post' !== get_class( $entry ) ) {
+			return $entry_content;
+		}
+
+		if ( 'testimonial' !== $entry->post_type ) {
+			return $entry_content;
+		}
+
+		return function_exists( 'mai_get_processed_content' ) ? mai_get_processed_content( $entry_content ) : $entry_content;
 	}
 
 	/**
