@@ -217,6 +217,7 @@ final class Mai_Testimonials {
 			'publicly_queryable' => true,
 			'show_in_menu'       => true,
 			'show_in_nav_menus'  => false,
+			'show_in_rest'       => true,
 			'show_ui'            => true,
 			'rewrite'            => [ 'slug' => 'testimonials', 'with_front' => false ],   // This is only here for when these args are filtered and public is made true.
 			'supports'           => [ 'title', 'editor', 'thumbnail', 'page-attributes', 'genesis-cpt-archives-settings' ], // 'page-attributes' only here for sort order, especially with Simple Page Ordering plugin.
@@ -286,37 +287,41 @@ final class Mai_Testimonials {
 		 ***********************/
 
 		register_taxonomy( 'testimonial_cat', 'testimonial',
-			apply_filters( 'mai_testimonial_cat_args', array(
-				'exclude_from_search' => true,
-				'has_archive'         => false,
-				'hierarchical'        => true,
-				'labels' => array(
-					'name'                       => _x( 'Testimonial Categories', 'taxonomy general name' , 'mai-testimonials' ),
-					'singular_name'              => _x( 'Testimonial Category' , 'taxonomy singular name' , 'mai-testimonials' ),
-					'search_items'               => __( 'Search Testimonial Categories'                   , 'mai-testimonials' ),
-					'popular_items'              => __( 'Popular Testimonial Categories'                  , 'mai-testimonials' ),
-					'all_items'                  => __( 'All Categories'                                  , 'mai-testimonials' ),
-					'edit_item'                  => __( 'Edit Testimonial Category'                       , 'mai-testimonials' ),
-					'update_item'                => __( 'Update Testimonial Category'                     , 'mai-testimonials' ),
-					'add_new_item'               => __( 'Add New Testimonial Category'                    , 'mai-testimonials' ),
-					'new_item_name'              => __( 'New Testimonial Category Name'                   , 'mai-testimonials' ),
-					'separate_items_with_commas' => __( 'Separate Testimonial Categories with commas'     , 'mai-testimonials' ),
-					'add_or_remove_items'        => __( 'Add or remove Testimonial Categories'            , 'mai-testimonials' ),
-					'choose_from_most_used'      => __( 'Choose from the most used Testimonial Categories', 'mai-testimonials' ),
-					'not_found'                  => __( 'No Testimonial Categories found.'                , 'mai-testimonials' ),
-					'menu_name'                  => __( 'Testimonial Categories'                          , 'mai-testimonials' ),
-					'parent_item'                => null,
-					'parent_item_colon'          => null,
-				),
-				'public'            => false,
-				'rewrite'           => false,
-				'show_admin_column' => true,
-				'show_in_menu'      => true,
-				'show_in_nav_menus' => false,
-				'show_tagcloud'     => false,
-				'show_ui'           => true,
+			apply_filters( 'mai_testimonial_cat_args',
+				[
+					'exclude_from_search' => true,
+					'has_archive'         => false,
+					'hierarchical'        => true,
+					'labels' =>
+					[
+						'name'                       => _x( 'Testimonial Categories', 'taxonomy general name' , 'mai-testimonials' ),
+						'singular_name'              => _x( 'Testimonial Category' , 'taxonomy singular name' , 'mai-testimonials' ),
+						'search_items'               => __( 'Search Testimonial Categories'                   , 'mai-testimonials' ),
+						'popular_items'              => __( 'Popular Testimonial Categories'                  , 'mai-testimonials' ),
+						'all_items'                  => __( 'All Categories'                                  , 'mai-testimonials' ),
+						'edit_item'                  => __( 'Edit Testimonial Category'                       , 'mai-testimonials' ),
+						'update_item'                => __( 'Update Testimonial Category'                     , 'mai-testimonials' ),
+						'add_new_item'               => __( 'Add New Testimonial Category'                    , 'mai-testimonials' ),
+						'new_item_name'              => __( 'New Testimonial Category Name'                   , 'mai-testimonials' ),
+						'separate_items_with_commas' => __( 'Separate Testimonial Categories with commas'     , 'mai-testimonials' ),
+						'add_or_remove_items'        => __( 'Add or remove Testimonial Categories'            , 'mai-testimonials' ),
+						'choose_from_most_used'      => __( 'Choose from the most used Testimonial Categories', 'mai-testimonials' ),
+						'not_found'                  => __( 'No Testimonial Categories found.'                , 'mai-testimonials' ),
+						'menu_name'                  => __( 'Testimonial Categories'                          , 'mai-testimonials' ),
+						'parent_item'                => null,
+						'parent_item_colon'          => null,
+					],
+					'public'            => false,
+					'rewrite'           => false,
+					'show_admin_column' => true,
+					'show_in_menu'      => true,
+					'show_in_nav_menus' => false,
+					'show_in_rest'      => true,
+					'show_tagcloud'     => false,
+					'show_ui'           => true,
+				]
 			)
-		) );
+		);
 
 	}
 
