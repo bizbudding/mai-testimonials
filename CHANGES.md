@@ -2,7 +2,7 @@
 
 ## 2.1.0 (3/2/21)
 * Added: Testimonials now use the block editor for content.
-* Changed: Testimonials now output full content, including blocks and shortcodes.
+* Changed: Testimonials now output full content, including blocks and shortcodes (requires Mai Engine 2.11).
 
 ## 2.0.3 (2/13/21)
 * Added: Mai logo icon to updater.
