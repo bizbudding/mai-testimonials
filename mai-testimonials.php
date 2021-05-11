@@ -214,12 +214,12 @@ final class Mai_Testimonials {
 			],
 			'menu_icon'          => 'dashicons-format-quote',
 			'public'             => false,
-			'publicly_queryable' => true,
+			'publicly_queryable' => false,
 			'show_in_menu'       => true,
 			'show_in_nav_menus'  => false,
 			'show_in_rest'       => true,
 			'show_ui'            => true,
-			'rewrite'            => [ 'slug' => 'testimonials', 'with_front' => false ],   // This is only here for when these args are filtered and public is made true.
+			'rewrite'            => false,
 			'supports'           => [ 'title', 'editor', 'thumbnail', 'page-attributes', 'genesis-cpt-archives-settings' ], // 'page-attributes' only here for sort order, especially with Simple Page Ordering plugin.
 		];
 		$this->post_type_args = apply_filters( 'mai_testimonial_args', $this->post_type_args );
