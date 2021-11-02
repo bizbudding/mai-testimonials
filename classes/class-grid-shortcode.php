@@ -1,8 +1,22 @@
 <?php
 
-class Mai_Testimonials_v1 {
+// Prevent direct file access.
+defined( 'ABSPATH' ) || die;
+
+class Mai_Testimonials_Grid_Shortcode {
 
 	function __construct() {
+		$this->hooks();
+	}
+
+	/**
+	 * Runs hooks.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	function hooks() {
 		add_action( 'wp_enqueue_scripts',         [ $this, 'css' ], 1000 ); // Way late cause Engine changes stylesheet to 999.
 		add_filter( 'shortcode_atts_grid',        [ $this, 'grid_atts' ], 8, 3 );
 		add_filter( 'genesis_attr_flex-entry',    [ $this, 'flex_entry_atts' ], 12, 3 );

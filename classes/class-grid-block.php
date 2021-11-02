@@ -1,8 +1,22 @@
 <?php
 
-class Mai_Testimonials_v2 {
+// Prevent direct file access.
+defined( 'ABSPATH' ) || die;
+
+class Mai_Testimonials_Grid_Block {
 
 	function __construct() {
+		$this->hooks();
+	}
+
+	/**
+	 * Runs hooks.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	function hooks() {
 		add_filter( 'mai_grid_post_types',                [ $this, 'post_types' ], 10, 3 );
 		add_filter( 'mai_link_entry',                     [ $this, 'link_entry' ], 10, 3 );
 		add_filter( 'mai_entry_content',                  [ $this, 'entry_content' ], 10, 3 );
