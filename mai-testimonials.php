@@ -14,14 +14,14 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * Main Mai_Testimonials Class.
+ * Main Mai_Testimonials_Plugin Class.
  *
  * @since 0.1.0
  */
-final class Mai_Testimonials {
+final class Mai_Testimonials_Plugin {
 
 	/**
-	 * @var    Mai_Testimonials The one true Mai_Testimonials
+	 * @var    Mai_Testimonials_Plugin The one true Mai_Testimonials_Plugin
 	 * @since  0.1.0
 	 */
 	private static $instance;
@@ -29,22 +29,22 @@ final class Mai_Testimonials {
 	private $post_type_args;
 
 	/**
-	 * Main Mai_Testimonials Instance.
+	 * Main Mai_Testimonials_Plugin Instance.
 	 *
-	 * Insures that only one instance of Mai_Testimonials exists in memory at any one
+	 * Insures that only one instance of Mai_Testimonials_Plugin exists in memory at any one
 	 * time. Also prevents needing to define globals all over the place.
 	 *
 	 * @since   0.1.0
 	 * @static  var array $instance
-	 * @uses    Mai_Testimonials::setup_constants() Setup the constants needed.
-	 * @uses    Mai_Testimonials::setup() Activate, deactivate, etc.
-	 * @see     Mai_Testimonials()
-	 * @return  object | Mai_Testimonials The one true Mai_Testimonials
+	 * @uses    Mai_Testimonials_Plugin::setup_constants() Setup the constants needed.
+	 * @uses    Mai_Testimonials_Plugin::setup() Activate, deactivate, etc.
+	 * @see     Mai_Testimonials_Plugin()
+	 * @return  object | Mai_Testimonials_Plugin The one true Mai_Testimonials_Plugin
 	 */
 	public static function instance() {
 		if ( ! isset( self::$instance ) ) {
 			// Setup the init
-			self::$instance = new Mai_Testimonials;
+			self::$instance = new Mai_Testimonials_Plugin;
 			// Methods
 			self::$instance->setup_constants();
 			self::$instance->includes();
@@ -227,7 +227,7 @@ final class Mai_Testimonials {
 
 	public function setup() {
 		// Bail if CMB2 is not running anywhere.
-		if ( ! ( class_exists( 'Mai_Theme_Engine' ) || current_theme_supports( 'mai-engine' ) ) ) {
+		if ( ! ( class_exists( 'Mai_Theme_Engine' ) || class_exists( 'Mai_Engine' ) ) ) {
 			add_action( 'admin_init',    [ $this, 'deactivate_plugin' ] );
 			add_action( 'admin_notices', [ $this, 'admin_notice' ] );
 			return;
@@ -236,11 +236,19 @@ final class Mai_Testimonials {
 		// Run
 		$this->hooks();
 
-		// Version specific files.
+		// Bail if Genesis is not running.
+		if ( ! function_exists( 'genesis' ) ) {
+			return;
+		}
+
+		// Mai Theme v1.
 		if ( class_exists( 'Mai_Theme_Engine' ) ) {
-			$v1 = new Mai_Testimonials_v1;
-		} elseif ( current_theme_supports( 'mai-engine' ) ) {
-			$v2 = new Mai_Testimonials_v2;
+			$grid  = new Mai_Testimonials_Grid_Shortcode;
+		}
+		// Mai Theme v2.
+		elseif ( class_exists( 'Mai_Engine' ) ) {
+			$grid  = new Mai_Testimonials_Grid_Block;
+			$block = new Mai_Testimonials_Block;
 		}
 	}
 
@@ -263,6 +271,7 @@ final class Mai_Testimonials {
 		add_filter( 'enter_title_here',                       [ $this, 'enter_title_text' ] );
 		add_action( 'add_meta_boxes',                         [ $this, 'add_meta_box' ] );
 		add_action( 'save_post_testimonial',                  [ $this, 'save_meta_box' ] );
+		add_filter( 'mai_display_taxonomy_post_type_choices', [ $this, 'display_taxonomy_post_types' ] );
 	}
 
 	public function activate() {
@@ -376,9 +385,11 @@ final class Mai_Testimonials {
 	 */
 	function enter_title_text( $title ){
 		$screen = get_current_screen();
+
 		if ( 'testimonial' !== $screen->post_type ) {
 			return $title;
 		}
+
 		return __( 'Enter person\'s name here', 'mai-testimonials' );
 	}
 
@@ -473,26 +484,36 @@ final class Mai_Testimonials {
 		update_post_meta( $post_id, 'url', esc_url( $_POST['maitestimonials_url'] ) );
 		update_post_meta( $post_id, 'byline', sanitize_text_field( $_POST['maitestimonials_byline'] ) );
 	}
+
+	/**
+	 * Adds testimonial post type to Mai Display Taxonomy settings.
+	 *
+	 * @since TBD
+	 *
+	 * @param array $post_types The existing post type choices.
+	 *
+	 * @return array
+	 */
+	function display_taxonomy_post_types( $post_types ) {
+		$post_types[] = 'testimonial';
+
+		return array_unique( $post_types );
+	}
 }
 
 /**
- * The main function for that returns Mai_Testimonials
+ * The main function for that returns Mai_Testimonials_Plugin
  *
- * The main function responsible for returning the one true Mai_Testimonials
+ * The main function responsible for returning the one true Mai_Testimonials_Plugin
  * Instance to functions everywhere.
- *
- * Use this function like you would a global variable, except without needing
- * to declare the global.
- *
- * Example: <?php $plugin = Mai_Testimonials(); ?>
  *
  * @since 0.1.0
  *
- * @return object|Mai_Testimonials The one true Mai_Testimonials Instance.
+ * @return object|Mai_Testimonials_Plugin The one true Mai_Testimonials_Plugin Instance.
  */
-function Mai_Testimonials() {
-	return Mai_Testimonials::instance();
+function mai_testimonials() {
+	return Mai_Testimonials_Plugin::instance();
 }
 
-// Get Mai_Testimonials Running.
-Mai_Testimonials();
+// Get Mai_Testimonials_Plugin Running.
+mai_testimonials();
