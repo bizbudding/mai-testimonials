@@ -6,6 +6,7 @@ defined( 'ABSPATH' ) || die;
 class Mai_Testimonials {
 
 	public $args;
+	public $query_args;
 	public $has_image;
 	public $has_name;
 	public $has_byline;
@@ -14,6 +15,8 @@ class Mai_Testimonials {
 	function __construct( $args ) {
 		$args = wp_parse_args( $args,
 			[
+				'slider'                 => true,
+				'page'                   => 1,
 				'font_size'              => '',
 				'text_align'             => '',
 				'image_location'         => '',
@@ -43,6 +46,8 @@ class Mai_Testimonials {
 
 		// Sanitize.
 		$args = [
+			'slider'                 => mai_sanitize_bool( $args['slider'] ),
+			'page'                   => absint( $args['page'] ),
 			'font_size'              => esc_html( $args['font_size'] ),
 			'text_align'             => esc_html( $args['text_align'] ),
 			'image_location'         => esc_html( $args['image_location'] ),
@@ -70,6 +75,7 @@ class Mai_Testimonials {
 		];
 
 		$this->args       = $args;
+		$this->query_args = $this->get_query_args();
 		$show_keys        = array_flip( $this->args['show'] );
 		$this->has_image  = isset( $show_keys['image'] );
 		$this->has_name   = isset( $show_keys['name'] );
@@ -89,7 +95,76 @@ class Mai_Testimonials {
 			return;
 		}
 
-		$html       = '';
+		$html  = '';
+		$query = new WP_Query( $this->query_args );
+
+		if ( $query->have_posts() ) {
+
+			// If slider.
+			// if ( $this->args['slider'] && 1 === $this->args['page'] ) {
+			// 	$html .= '<div class="mai-testimonials-slider">';
+			// }
+
+			$html .= $this->get_open();
+				$html .= $this->get_inner();
+
+					while ( $query->have_posts() ) : $query->the_post();
+						$content  = get_the_content();
+						$image_id = $this->has_image ? get_post_thumbnail_id() : '';
+						$image    = $this->has_image && $image_id ? wp_get_attachment_image( $image_id, 'tiny' ) : '';
+						$image    = $image ? sprintf( '<div class="mai-testimonial-image">%s</div>', $image ) : '';
+						$name     = $this->has_name ? get_the_title() : '';
+						$name     = $name ? sprintf( '<span class="mai-testimonial-name">%s</span>', $name ) : '';
+						$byline   = $this->has_byline ? get_post_meta( get_the_ID(), 'byline', true ) : '';
+						$byline   = $byline ? sprintf( '<span class="mai-testimonial-byline">%s</span>', $byline ) : '';
+						$details  = $this->get_details( $image, $name, $byline );
+
+						$html .= '<div class="mai-testimonial">';
+
+							if ( 'before' === $this->args['image_location'] ) {
+								$html .= $image ?: '';
+							}
+
+							if ( 'before' === $this->args['author_location'] ) {
+								$html .= $details ?: '';
+							}
+
+							$html .= sprintf( '<div class="mai-testimonial-content">%s</div>', mai_get_processed_content( $content ) );
+
+							if ( 'after' === $this->args['image_location'] ) {
+								$html .= $image ?: '';
+							}
+
+							if ( 'after' === $this->args['author_location'] ) {
+								$html .= $details ?: '';
+							}
+
+						$html .= '</div>';
+
+					endwhile;
+
+				$html .= '</div>';
+
+				// TODO: Hide prev or next buttons if none.
+
+				$html .= '<br><br><ul style="display:flex;justify-content:center;list-style-type:none;">';
+					$html .= '<li><button class="mai-testimonials-button mai-testimonials-previous">Previous</li>&nbsp;';
+					$html .= '<li><button class="mai-testimonials-button mai-testimonials-next">Next</li>';
+				$html .= '</ul>';
+
+			$html .= '</div>';
+
+			// if ( $this->args['slider'] && 1 === $this->args['page'] ) {
+			// 	$html .= '</div>'; // Slider.
+			// }
+		}
+
+		wp_reset_postdata();
+
+		return $html;
+	}
+
+	function get_query_args() {
 		$query_args = [
 			'post_type'              => 'testimonial',
 			'no_found_rows'          => true,
@@ -102,6 +177,11 @@ class Mai_Testimonials {
 
 			if ( $this->args['number'] ) {
 				$query_args['posts_per_page'] = $this->args['number'];
+
+				// Offset for slider.
+				// if ( $this->args['page'] ) {
+				// 	$query_args['offset'] = (int) $query_args['posts_per_page'] * (int) $this->args['page'];
+				// }
 			}
 
 			if ( $this->args['orderby'] ) {
@@ -169,56 +249,7 @@ class Mai_Testimonials {
 			$query_args['order'] = $this->args['order'];
 		}
 
-		$query = new WP_Query( $query_args );
-
-		if ( $query->have_posts() ) {
-
-			$html .= $this->get_open();
-				$html .= $this->get_inner();
-
-					while ( $query->have_posts() ) : $query->the_post();
-						$content  = get_the_content();
-						$image_id = $this->has_image ? get_post_thumbnail_id() : '';
-						$image    = $this->has_image && $image_id ? wp_get_attachment_image( $image_id, 'tiny' ) : '';
-						$image    = $image ? sprintf( '<div class="mai-testimonial-image">%s</div>', $image ) : '';
-						$name     = $this->has_name ? get_the_title() : '';
-						$name     = $name ? sprintf( '<span class="mai-testimonial-name">%s</span>', $name ) : '';
-						$byline   = $this->has_byline ? get_post_meta( get_the_ID(), 'byline', true ) : '';
-						$byline   = $byline ? sprintf( '<span class="mai-testimonial-byline">%s</span>', $byline ) : '';
-						$details  = $this->get_details( $image, $name, $byline );
-
-						$html .= '<div class="mai-testimonial">';
-
-							if ( 'before' === $this->args['image_location'] ) {
-								$html .= $image ?: '';
-							}
-
-							if ( 'before' === $this->args['author_location'] ) {
-								$html .= $details ?: '';
-							}
-
-							$html .= sprintf( '<div class="mai-testimonial-content">%s</div>', mai_get_processed_content( $content ) );
-
-							if ( 'after' === $this->args['image_location'] ) {
-								$html .= $image ?: '';
-							}
-
-							if ( 'after' === $this->args['author_location'] ) {
-								$html .= $details ?: '';
-							}
-
-						$html .= '</div>';
-
-					endwhile;
-
-				$html .= '</div>';
-			$html .= '</div>';
-
-		}
-
-		wp_reset_postdata();
-
-		return $html;
+		return $query_args;
 	}
 
 	function get_open() {
@@ -273,6 +304,10 @@ class Mai_Testimonials {
 		if ( 'inside' === $this->args['image_location'] && ( $this->has_name || $this->has_byline ) ) {
 			$attributes['style'] .= '--testimonial-image-margin:0 var(--spacing-md) 0 0;--testimonial-details-text-align:left;';
 		}
+
+		// Data attributes.
+		$attributes['data-args']  = esc_html( json_encode( $this->args ), ENT_QUOTES, 'UTF-8' );
+		$attributes['data-query'] = esc_html( json_encode( $this->query_args ), ENT_QUOTES, 'UTF-8' );
 
 		return genesis_markup(
 			[

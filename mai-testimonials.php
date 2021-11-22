@@ -105,9 +105,9 @@ final class Mai_Testimonials_Plugin {
 		}
 
 		// Plugin Includes Path.
-		// if ( ! defined( 'MAI_TESTIMONIALS_INCLUDES_DIR' ) ) {
-		// 	define( 'MAI_TESTIMONIALS_INCLUDES_DIR', MAI_TESTIMONIALS_PLUGIN_DIR . 'includes/' );
-		// }
+		if ( ! defined( 'MAI_TESTIMONIALS_INCLUDES_DIR' ) ) {
+			define( 'MAI_TESTIMONIALS_INCLUDES_DIR', MAI_TESTIMONIALS_PLUGIN_DIR . 'includes/' );
+		}
 
 		// Plugin Folder URL.
 		if ( ! defined( 'MAI_TESTIMONIALS_PLUGIN_URL' ) ) {
@@ -136,6 +136,8 @@ final class Mai_Testimonials_Plugin {
 		// Include vendor libraries.
 		require_once __DIR__ . '/vendor/autoload.php';
 		// Includes.
+		foreach ( glob( MAI_TESTIMONIALS_INCLUDES_DIR . '*.php' ) as $file ) { include $file; }
+		// Classes.
 		foreach ( glob( MAI_TESTIMONIALS_CLASSES_DIR . '*.php' ) as $file ) { include $file; }
 	}
 

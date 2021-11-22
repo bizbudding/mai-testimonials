@@ -1,3 +1,14 @@
+.mai-testimonials-slider {
+	display: grid;
+	grid-template-areas: "testimonials";
+	grid-template-rows: 1fr;
+	grid-template-columns: 1fr;
+}
+
+.mai-testimonials-slider .mai-testimonials {
+	grid-area: testimonials;
+}
+
 .mai-testimonials-inner {
 	display: flex;
 	flex-wrap: wrap;
