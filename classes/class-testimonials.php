@@ -7,6 +7,8 @@ class Mai_Testimonials {
 
 	public $args;
 	public $query_args;
+	public $prev;
+	public $next;
 	public $has_image;
 	public $has_name;
 	public $has_byline;
@@ -76,6 +78,8 @@ class Mai_Testimonials {
 
 		$this->args       = $args;
 		$this->query_args = $this->get_query_args();
+		$this->prev       = 1;
+		$this->next       = 1;
 		$show_keys        = array_flip( $this->args['show'] );
 		$this->has_image  = isset( $show_keys['image'] );
 		$this->has_name   = isset( $show_keys['name'] );
@@ -100,10 +104,31 @@ class Mai_Testimonials {
 
 		if ( $query->have_posts() ) {
 
+			$this->prev = $this->get_prev_page( $query );
+			$this->next = $this->get_next_page( $query );
+
 			// If slider.
-			if ( $this->args['slider'] && 1 === $this->args['paged'] ) {
 			// if ( $this->args['slider'] ) {
-				$html .= '<div class="mai-testimonials-slider">';
+			if ( $this->args['slider'] && 1 === $this->args['paged'] ) {
+				$attributes = [
+					'class'      => 'mait-slider',
+					'data-args'  => esc_html( json_encode( $this->args ), ENT_QUOTES, 'UTF-8' ),
+					'data-paged' => $this->args['paged'],
+					'data-prev'  => $this->prev,
+					'data-next'  => $this->next,
+				];
+
+				$html .= genesis_markup(
+					[
+						'open'    => '<div %s>',
+						'context' => 'testimonials-slider',
+						'echo'    => false,
+						'atts'    => $attributes,
+						'params'  => [
+							'args' => $this->args,
+						],
+					]
+				);
 			}
 
 			$html .= $this->get_open();
@@ -113,14 +138,14 @@ class Mai_Testimonials {
 						$content  = get_the_content();
 						$image_id = $this->has_image ? get_post_thumbnail_id() : '';
 						$image    = $this->has_image && $image_id ? wp_get_attachment_image( $image_id, 'tiny' ) : '';
-						$image    = $image ? sprintf( '<div class="mai-testimonial-image">%s</div>', $image ) : '';
+						$image    = $image ? sprintf( '<div class="mait-image">%s</div>', $image ) : '';
 						$name     = $this->has_name ? get_the_title() : '';
-						$name     = $name ? sprintf( '<span class="mai-testimonial-name">%s</span>', $name ) : '';
+						$name     = $name ? sprintf( '<span class="mait-name">%s</span>', $name ) : '';
 						$byline   = $this->has_byline ? get_post_meta( get_the_ID(), 'byline', true ) : '';
-						$byline   = $byline ? sprintf( '<span class="mai-testimonial-byline">%s</span>', $byline ) : '';
+						$byline   = $byline ? sprintf( '<span class="mait-byline">%s</span>', $byline ) : '';
 						$details  = $this->get_details( $image, $name, $byline );
 
-						$html .= '<div class="mai-testimonial">';
+						$html .= '<div class="mait-testimonial">';
 
 							if ( 'before' === $this->args['image_location'] ) {
 								$html .= $image ?: '';
@@ -130,7 +155,7 @@ class Mai_Testimonials {
 								$html .= $details ?: '';
 							}
 
-							$html .= sprintf( '<div class="mai-testimonial-content">%s</div>', mai_get_processed_content( $content ) );
+							$html .= sprintf( '<div class="mait-content">%s</div>', mai_get_processed_content( $content ) );
 
 							if ( 'after' === $this->args['image_location'] ) {
 								$html .= $image ?: '';
@@ -146,22 +171,30 @@ class Mai_Testimonials {
 
 				$html .= '</div>';
 
-				// $html .= '<br><br><ul style="display:flex;justify-content:center;list-style-type:none;">';
-				// 	$html .= '<li><button class="mai-testimonials-button mai-testimonials-previous">Previous</li>&nbsp;';
-				// 	$html .= '<li><button class="mai-testimonials-button mai-testimonials-next">Next</li>';
-				// $html .= '</ul>';
+				// TODO: We can probably do this with only 1 set of buttons.
+
 				if ( $this->args['slider'] ) {
 					$html .= $this->get_prev_next_posts_nav( $query );
-					// $html .= '<div class="mai-testimonials-pagination">';
-					$html .= $this->get_numeric_posts_nav( $query );
-					// $html .= '</div>';
+
+					// TODO: Dots can be mait-button with data-paged so all JS just works.
+
+					// $html .= $this->get_numeric_posts_nav( $query );
 				}
 
 			$html .= '</div>';
 
 			if ( $this->args['slider'] && 1 === $this->args['paged'] ) {
 			// if ( $this->args['slider'] ) {
-				$html .= '</div>'; // Slider.
+				$html .= genesis_markup(
+					[
+						'close'   => '</div>',
+						'context' => 'testimonials-slider',
+						'echo'    => false,
+						'params'  => [
+							'args' => $this->args,
+						],
+					]
+				);
 			}
 		}
 
@@ -264,7 +297,7 @@ class Mai_Testimonials {
 
 	function get_open() {
 		$attributes = [
-			'class' => mai_add_classes( 'mai-testimonials', $this->args['class'] ),
+			'class' => mai_add_classes( 'mait-testimonials', $this->args['class'] ),
 			'style' => '',
 		];
 
@@ -315,13 +348,10 @@ class Mai_Testimonials {
 			$attributes['style'] .= '--testimonial-image-margin:0 var(--spacing-md) 0 0;--testimonial-details-text-align:left;';
 		}
 
+		// Current page.
 		if ( $this->args['paged'] ) {
 			$attributes['data-paged'] = $this->args['paged'];
 		}
-
-		// Data attributes.
-		$attributes['data-args']  = esc_html( json_encode( $this->args ), ENT_QUOTES, 'UTF-8' );
-		$attributes['data-query'] = esc_html( json_encode( $this->query_args ), ENT_QUOTES, 'UTF-8' );
 
 		return genesis_markup(
 			[
@@ -342,7 +372,7 @@ class Mai_Testimonials {
 				'open'    => '<div %s>',
 				'context' => 'testimonials-inner',
 				'echo'    => false,
-				'atts'    => [ 'class' => 'mai-testimonials-inner' ],
+				'atts'    => [ 'class' => 'mait-inner' ],
 				'params'  => [
 					'args' => $this->args,
 				],
@@ -358,7 +388,7 @@ class Mai_Testimonials {
 		}
 
 		if ( $name || $byline ) {
-			$html .= '<div class="mai-testimonial-author">';
+			$html .= '<div class="mait-author">';
 				$html .= $name ?: '';
 				$html .= $byline ?: '';
 			$html .= '</div>';
@@ -375,7 +405,7 @@ class Mai_Testimonials {
 				'context' => 'testimonial-details',
 				'content' => $html,
 				'echo'    => false,
-				'atts'    => [ 'class' => 'mai-testimonial-details' ],
+				'atts'    => [ 'class' => 'mait-details' ],
 				'params'  => [
 					'args' => $this->args,
 				],
@@ -394,10 +424,9 @@ class Mai_Testimonials {
 		$next_link = $this->get_next_posts_link( $query );
 
 		if ( $prev_link || $next_link ) {
-
-			$html .= '<ul class="testimonial-slider-arrows">';
-				$html .= $prev_link ? sprintf( '<li class="testimonials-slider-arrow testimonials-slider-arrow-previous">%s</li>', $prev_link ) : '';
-				$html .= $next_link ? sprintf( '<li class="testimonials-slider-arrow testimonials-slider-arrow-next">%s</li>', $next_link ) : '';
+			$html .= '<ul class="mait-arrows">';
+				$html .= $prev_link ? sprintf( '<li class="mait-arrow mait-arrow-previous">%s</li>', $prev_link ) : '';
+				$html .= $next_link ? sprintf( '<li class="mait-arrow mait-arrow-next">%s</li>', $next_link ) : '';
 			$html .= '</ul>';
 		}
 
@@ -405,23 +434,31 @@ class Mai_Testimonials {
 	}
 
 	function get_previous_posts_link( $query ) {
-		$nextpage = (int) $this->args['paged'] - 1;
-
-		if ( $nextpage < 1 ) {
-			$nextpage = (int) $query->max_num_pages;
-		}
-
-		return sprintf( '<button class="testimonials-pagination-button button button-secondary button-small" data-paged="%s">%s</button>', $nextpage, '<' );
+		return sprintf( '<button class="mait-button mait-previous" data-paged="%s">%s</button>', $this->get_prev_page( $query ), '<' );
 	}
 
 	function get_next_posts_link( $query ) {
-		$nextpage = (int) $this->args['paged'] + 1;
+		return sprintf( '<button class="mait-button mait-next" data-paged="%s">%s</button>', $this->get_next_page( $query ), '>' );
+	}
 
-		if ( $nextpage > (int) $query->max_num_pages ) {
-			$nextpage = 1;
+	function get_prev_page( $query ) {
+		$page = (int) $this->args['paged'] - 1;
+
+		if ( $page < 1 ) {
+			$page = (int) $query->max_num_pages;
 		}
 
-		return sprintf( '<button class="testimonials-pagination-button button button-secondary button-small" data-paged="%s">%s</button>', $nextpage, '>' );
+		return $page;
+	}
+
+	function get_next_page( $query ) {
+		$page = (int) $this->args['paged'] + 1;
+
+		if ( $page > (int) $query->max_num_pages ) {
+			$page = 1;
+		}
+
+		return $page;
 	}
 
 	/**

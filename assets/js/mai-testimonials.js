@@ -1,116 +1,151 @@
 ( function() {
 
+	var allSliders    = document.querySelectorAll( '.mait-slider' );
+	var sliderButtons = document.querySelectorAll( '.mait-button' );
+	var prevPage      = 1;
+	var nextPage      = 1;
+	var paged         = 1;
+
 	var getTestimonials = function( event ) {
 		event.preventDefault();
 
-		var slider    = event.target.closest( '.mai-testimonials-slider' );
-		var block     = slider.querySelector( '.mai-testimonials' );
-		var blockArgs = JSON.parse( block.getAttribute( 'data-args' ) );
-		// const queryArgs = block.getAttribute( 'data-query' );
+		var slider   = event.target.closest( '.mait-slider' );
+		var args     = JSON.parse( slider.getAttribute( 'data-args' ) );
+		prevPage     = slider.getAttribute( 'data-prev' );
+		nextPage     = slider.getAttribute( 'data-next' );
+		paged        = event.target.getAttribute( 'data-paged' );
+		args.paged   = paged;
 
-		blockArgs.paged = event.target.getAttribute( 'data-paged' );
+		getSlide( slider, args );
+	};
 
-		console.log( blockArgs.paged );
-		// console.log( event.target.getAttribute( 'data-paged' ) );
-		// console.log( JSON.stringify( queryArgs ) );
-
-		// const urlArgs   = {
-		// 	action: 'mait_load_more_posts',
-		// 	nonce: maiTestimonialsVars.nonce,
-		// 	query_args: JSON.stringify( queryArgs ),
-		// 	query_args: queryArgs,
-		// 	posts_per_page: 8,
-		// 	something: 'else',
-		// };
-
-		var data = {
+	var getSlide = function( slider, args ) {
+		var data  = {
 			action: 'mait_load_more_posts',
 			nonce: maiTestimonialsVars.nonce,
-			// query_args: JSON.stringify( queryArgs ),
-			block_args: JSON.stringify( blockArgs ),
-			// query_args: queryArgs,
+			block_args: JSON.stringify( args ),
 		};
-
-		// var data = new FormData();
-		// data.append( 'query_args', JSON.stringify( queryArgs ) );
 
 		fetch( maiTestimonialsVars.ajaxurl, {
 			method: "POST",
 			credentials: 'same-origin',
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded',
-				// 'Content-Type': 'application/json',
 				'Cache-Control': 'no-cache',
 			},
-			// headers: {
-			// 	'Accept': 'application/json'
-			// },
-			// body: new URLSearchParams({
-			// 	action: 'mait_load_more_posts',
-			// 	nonce: maiTestimonialsVars.nonce,
-			// 	query_args: queryArgs,
-			// })
-			// body: new URLSearchParams( urlArgs ),
 			body: new URLSearchParams( data ),
-			// body: JSON.stringify( queryArgs )
-			// body: JSON.stringify( data )
-			// body: data,
 		})
 		.then( (response) => response.json() )
-		// .then( (response) => response.text() )
 		.then( (data) => {
-			console.log( data );
-
 			if ( data.success ) {
-				var existing = slider.querySelector( '.mai-testimonials[data-paged="' + data.data.paged + '"]' );
+				prevPage = data.data.prev;
+				nextPage = data.data.next;
+				paged    = data.data.paged;
+
+				var existing = slider.querySelector( '.mait-testimonials[data-paged="' + paged + '"]' );
 
 				if ( existing ) {
-					existing.classList.remove( 'mai-testimonials-hidden' );
+					// Toggle visiblity classes.
+					existing.classList.add( 'mait-visible' );
+					existing.classList.remove( 'mait-hidden' );
 				} else {
+					// Build new slider.
 					var div = document.createElement( 'div' );
-					div.innerHTML = data.data.block.trim();
-					slider.append( div.firstChild );
+					div.innerHTML = data.data.html.trim();
+					var newSlider = div.firstChild;
+
+					// Add visible class.
+					newSlider.classList.add( 'mait-visible' );
+
+					// Append to the HTML.
+					slider.append( newSlider );
+
+					// Add arrow keys listener for the new slider.
+					newSlider.addEventListener( 'focusin', handleArrowKeys );
+
+					// Get new buttons.
+					var newButtons = newSlider.querySelectorAll( '.mait-button' );
+
+					// Add button click listener.
+					newButtons.forEach( function( button ) {
+						button.addEventListener( 'click', getTestimonials );
+					});
 				}
 
-				var sliders = slider.querySelectorAll( '.mai-testimonials:not([data-paged="' + data.data.paged + '"])' );
-
-				sliders.forEach( function( toHide ) {
-					toHide.classList.add( 'mai-testimonials-hidden' )
+				slider.querySelectorAll( '.mait-testimonials:not([data-paged="' + paged + '"])' ).forEach( function( toHide ) {
+					toHide.classList.add( 'mait-hidden' );
+					toHide.classList.remove( 'mait-visible' );
 				});
 
-				// slider.querySelector( '.mai-testimonials[data-paged="' + data.data.paged + '"]' ).classList.remove( 'mai-testimonials-hidden' );
-
-				// Add event listener for new sliders.
-				var sliderButtons = document.querySelectorAll( '.testimonials-pagination-button' );
-
-				sliderButtons.forEach( function( sliderButton ) {
-					sliderButton.addEventListener( 'click', getTestimonials, false );
-				});
+				slider.setAttribute( 'data-prev', prevPage );
+				slider.setAttribute( 'data-next', nextPage );
+				slider.setAttribute( 'data-paged', paged );
 			}
-
-			// Initialize the DOM parser
-			// var parser = new DOMParser();
-
-			// Parse the text
-			// var doc = parser.parseFromString( data, 'text/html' );
-
-			// You can now even select part of that html as you would in the regular DOM
-			// Example:
-			// var docArticle = doc.querySelector('article').innerHTML;
-
-			// console.log( decodeURI( doc.body.innerHTML ) );
 		})
 		.catch( (error) => {
-			console.log( 'Mai Testimonials block:' );
-			// console.log( 'catch error' );
-			console.error( error );
+			console.log( 'Mai Testimonials block:', error );
 		});
 	};
 
-	var sliderButtons = document.querySelectorAll( '.testimonials-pagination-button' );
+	/**
+	 * Changes slide with arrow keys.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	var handleArrowKeys = function( event ) {
+		document.onkeydown = function(e) {
+			e = e || window.event;
 
+			var slider = event.target.closest( '.mait-slider' );
+			var args   = JSON.parse( slider.getAttribute( 'data-args' ) );
+			var keys   = [ 'ArrowLeft', 'ArrowRight' ];
+
+			if ( keys.includes( e.key ) ) {
+
+				switch (e.key) {
+					case 'ArrowLeft':
+						paged = prevPage;
+					break;
+					case 'ArrowRight':
+						paged = nextPage;
+					break;
+				}
+
+				args.paged = paged;
+
+				getSlide( slider, args );
+			}
+		};
+	};
+
+	/**
+	 * Adds click event to change slide.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
 	sliderButtons.forEach( function( sliderButton ) {
 		sliderButton.addEventListener( 'click', getTestimonials, false );
+	});
+
+	/**
+	 * Adds focusin event to change slide with arrow keys.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	allSliders.forEach( function( slider ) {
+		slider.addEventListener( 'focusin', handleArrowKeys );
+
+		// TODO: When focus out of slider we need to remove focusin listener somehow.
+
+		// slider.addEventListener( 'focusout', function( event ) {
+		// 	slider.removeEventListener(	'focusin', handleArrowKeys );
+		// });
 	});
 
 } )();

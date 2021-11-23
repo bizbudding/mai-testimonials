@@ -9,19 +9,26 @@ function mait_load_more_posts() {
 	$security = check_ajax_referer( 'mai_testimonials_slider', 'nonce' );
 
 	if ( false === $security ) {
-		return;
+		// return;
+		// wp_die();
+		return wp_send_json_error();
 	}
 
 	if ( ! isset( $_POST['block_args'] ) ) {
-		return;
+		// return;
+		// wp_die();
+		return wp_send_json_error();
 	}
 
 	$args         = wp_unslash( $_POST['block_args'] );
 	$args         = json_decode( $args, true );
 	$testimonials = new Mai_Testimonials( $args );
+	$html         = $testimonials->get(); // Get first so prev/next properties are set.
 	$data         = [
-		'block' => $testimonials->get(),
+		'html'  => $html,
 		'paged' => $args['paged'],
+		'prev'  => $testimonials->prev,
+		'next'  => $testimonials->next,
 	];
 
 	// ray( $_POST );
