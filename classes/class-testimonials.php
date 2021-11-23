@@ -171,8 +171,9 @@ class Mai_Testimonials {
 
 				$html .= '</div>';
 
-				// TODO: We can probably do this with only 1 set of buttons.
+			$html .= '</div>';
 
+			if ( $this->args['slider'] && 1 === $this->args['paged'] ) {
 				if ( $this->args['slider'] ) {
 					$html .= $this->get_prev_next_posts_nav( $query );
 
@@ -181,9 +182,6 @@ class Mai_Testimonials {
 					// $html .= $this->get_numeric_posts_nav( $query );
 				}
 
-			$html .= '</div>';
-
-			if ( $this->args['slider'] && 1 === $this->args['paged'] ) {
 			// if ( $this->args['slider'] ) {
 				$html .= genesis_markup(
 					[

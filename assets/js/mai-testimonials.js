@@ -62,14 +62,6 @@
 
 					// Add arrow keys listener for the new slider.
 					newSlider.addEventListener( 'focusin', handleArrowKeys );
-
-					// Get new buttons.
-					var newButtons = newSlider.querySelectorAll( '.mait-button' );
-
-					// Add button click listener.
-					newButtons.forEach( function( button ) {
-						button.addEventListener( 'click', getTestimonials );
-					});
 				}
 
 				slider.querySelectorAll( '.mait-testimonials:not([data-paged="' + paged + '"])' ).forEach( function( toHide ) {
@@ -80,6 +72,8 @@
 				slider.setAttribute( 'data-prev', prevPage );
 				slider.setAttribute( 'data-next', nextPage );
 				slider.setAttribute( 'data-paged', paged );
+				slider.querySelector( '.mait-previous' ).setAttribute( 'data-paged', prevPage );
+				slider.querySelector( '.mait-next' ).setAttribute( 'data-paged', nextPage );
 			}
 		})
 		.catch( (error) => {
