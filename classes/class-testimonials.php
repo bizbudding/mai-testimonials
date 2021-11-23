@@ -16,7 +16,7 @@ class Mai_Testimonials {
 		$args = wp_parse_args( $args,
 			[
 				'slider'                 => true,
-				'page'                   => 1,
+				'paged'                  => 1,
 				'font_size'              => '',
 				'text_align'             => '',
 				'image_location'         => '',
@@ -47,7 +47,7 @@ class Mai_Testimonials {
 		// Sanitize.
 		$args = [
 			'slider'                 => mai_sanitize_bool( $args['slider'] ),
-			'page'                   => absint( $args['page'] ),
+			'paged'                  => absint( $args['paged'] ),
 			'font_size'              => esc_html( $args['font_size'] ),
 			'text_align'             => esc_html( $args['text_align'] ),
 			'image_location'         => esc_html( $args['image_location'] ),
@@ -101,9 +101,10 @@ class Mai_Testimonials {
 		if ( $query->have_posts() ) {
 
 			// If slider.
-			// if ( $this->args['slider'] && 1 === $this->args['page'] ) {
-			// 	$html .= '<div class="mai-testimonials-slider">';
-			// }
+			if ( $this->args['slider'] && 1 === $this->args['paged'] ) {
+			// if ( $this->args['slider'] ) {
+				$html .= '<div class="mai-testimonials-slider">';
+			}
 
 			$html .= $this->get_open();
 				$html .= $this->get_inner();
@@ -145,18 +146,23 @@ class Mai_Testimonials {
 
 				$html .= '</div>';
 
-				// TODO: Hide prev or next buttons if none.
-
-				$html .= '<br><br><ul style="display:flex;justify-content:center;list-style-type:none;">';
-					$html .= '<li><button class="mai-testimonials-button mai-testimonials-previous">Previous</li>&nbsp;';
-					$html .= '<li><button class="mai-testimonials-button mai-testimonials-next">Next</li>';
-				$html .= '</ul>';
+				// $html .= '<br><br><ul style="display:flex;justify-content:center;list-style-type:none;">';
+				// 	$html .= '<li><button class="mai-testimonials-button mai-testimonials-previous">Previous</li>&nbsp;';
+				// 	$html .= '<li><button class="mai-testimonials-button mai-testimonials-next">Next</li>';
+				// $html .= '</ul>';
+				if ( $this->args['slider'] ) {
+					$html .= $this->get_prev_next_posts_nav( $query );
+					// $html .= '<div class="mai-testimonials-pagination">';
+					$html .= $this->get_numeric_posts_nav( $query );
+					// $html .= '</div>';
+				}
 
 			$html .= '</div>';
 
-			// if ( $this->args['slider'] && 1 === $this->args['page'] ) {
-			// 	$html .= '</div>'; // Slider.
-			// }
+			if ( $this->args['slider'] && 1 === $this->args['paged'] ) {
+			// if ( $this->args['slider'] ) {
+				$html .= '</div>'; // Slider.
+			}
 		}
 
 		wp_reset_postdata();
@@ -167,11 +173,15 @@ class Mai_Testimonials {
 	function get_query_args() {
 		$query_args = [
 			'post_type'              => 'testimonial',
-			'no_found_rows'          => true,
+			'no_found_rows'          => ! $this->args['paged'],
 			'update_post_meta_cache' => false,
 			'update_post_term_cache' => false,
 			'suppress_filters'       => false, // https://github.com/10up/Engineering-Best-Practices/issues/116
 		];
+
+		if ( $this->args['paged'] > 1 ) {
+			$query_args['paged'] = $this->args['paged'];
+		}
 
 		if ( 'id' !== $this->args['query_by'] ) {
 
@@ -179,8 +189,8 @@ class Mai_Testimonials {
 				$query_args['posts_per_page'] = $this->args['number'];
 
 				// Offset for slider.
-				// if ( $this->args['page'] ) {
-				// 	$query_args['offset'] = (int) $query_args['posts_per_page'] * (int) $this->args['page'];
+				// if ( $this->args['paged'] ) {
+				// 	$query_args['offset'] = (int) $query_args['posts_per_page'] * (int) $this->args['paged'];
 				// }
 			}
 
@@ -305,6 +315,10 @@ class Mai_Testimonials {
 			$attributes['style'] .= '--testimonial-image-margin:0 var(--spacing-md) 0 0;--testimonial-details-text-align:left;';
 		}
 
+		if ( $this->args['paged'] ) {
+			$attributes['data-paged'] = $this->args['paged'];
+		}
+
 		// Data attributes.
 		$attributes['data-args']  = esc_html( json_encode( $this->args ), ENT_QUOTES, 'UTF-8' );
 		$attributes['data-query'] = esc_html( json_encode( $this->query_args ), ENT_QUOTES, 'UTF-8' );
@@ -367,6 +381,194 @@ class Mai_Testimonials {
 				],
 			]
 		);
+	}
+
+	/**
+	 * Gets prev/next slide arrows.
+	 *
+	 * @since TBD
+	 */
+	function get_prev_next_posts_nav( $query ) {
+		$html      = '';
+		$prev_link = $this->get_previous_posts_link( $query );
+		$next_link = $this->get_next_posts_link( $query );
+
+		if ( $prev_link || $next_link ) {
+
+			$html .= '<ul class="testimonial-slider-arrows">';
+				$html .= $prev_link ? sprintf( '<li class="testimonials-slider-arrow testimonials-slider-arrow-previous">%s</li>', $prev_link ) : '';
+				$html .= $next_link ? sprintf( '<li class="testimonials-slider-arrow testimonials-slider-arrow-next">%s</li>', $next_link ) : '';
+			$html .= '</ul>';
+		}
+
+		return $html;
+	}
+
+	function get_previous_posts_link( $query ) {
+		$nextpage = (int) $this->args['paged'] - 1;
+
+		if ( $nextpage < 1 ) {
+			$nextpage = (int) $query->max_num_pages;
+		}
+
+		return sprintf( '<button class="testimonials-pagination-button button button-secondary button-small" data-paged="%s">%s</button>', $nextpage, '<' );
+	}
+
+	function get_next_posts_link( $query ) {
+		$nextpage = (int) $this->args['paged'] + 1;
+
+		if ( $nextpage > (int) $query->max_num_pages ) {
+			$nextpage = 1;
+		}
+
+		return sprintf( '<button class="testimonials-pagination-button button button-secondary button-small" data-paged="%s">%s</button>', $nextpage, '>' );
+	}
+
+	/**
+	 * Gets pagination dots.
+	 *
+	 * The links, if needed, are ordered as:
+	 *
+	 *  * previous page arrow,
+	 *  * first page,
+	 *  * up to two pages before current page,
+	 *  * current page,
+	 *  * up to two pages after the current page,
+	 *  * last page,
+	 *  * next page arrow.
+	 *
+	 * @since TBD
+	 *
+	 * @param WP_Query $query Query object.
+	 *
+	 * @return void Return early if on a single post or page, or only one page exists.
+	 */
+	function get_numeric_posts_nav( $query ) {
+		// Stop execution if there's only one page.
+		if ( $query->max_num_pages <= 1 ) {
+			return;
+		}
+
+		$html  = '';
+		$paged = $this->args['paged'];
+		$max   = (int) $query->max_num_pages;
+
+		// Add current page to the array.
+		if ( $paged >= 1 ) {
+			$links[] = $paged;
+		}
+
+		// Add the pages around the current page to the array.
+		if ( $paged >= 3 ) {
+			$links[] = $paged - 1;
+			$links[] = $paged - 2;
+		}
+
+		if ( ( $paged + 2 ) <= $max ) {
+			$links[] = $paged + 2;
+			$links[] = $paged + 1;
+		}
+
+		$atts = [
+			'role'       => 'navigation',
+			'aria-label' => esc_attr__( 'Pagination', 'genesis' ),
+		];
+
+		$html .= genesis_markup(
+			[
+				'open'    => '<div %s>',
+				'context' => 'archive-pagination',
+				'echo'    => false,
+				'atts'    => $atts,
+			]
+		);
+
+		$before_number = sprintf( '<span class="screen-reader-text">%s</span>', __( 'Go to page', 'genesis' ) );
+
+		$html .= '<ul>';
+
+		// Previous Post Link.
+		if ( get_previous_posts_link() ) {
+			$ally_label = __( '<span class="screen-reader-text">Go to</span> Previous Page', 'genesis' );
+			$label      = genesis_a11y() ? $ally_label : __( 'Previous Page', 'genesis' );
+			$link       = get_previous_posts_link( apply_filters( 'genesis_prev_link_text', '&#x000AB; ' . $label ) );
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Value is hardcoded and safe, not set via input.
+			$html .= sprintf( '<li class="pagination-previous">%s</li>' . "\n", $link );
+		}
+
+		// Link to first page, plus ellipses if necessary.
+		if ( ! in_array( 1, $links, true ) ) {
+			$class = 1 === $paged ? ' class="active"' : '';
+
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Value is known to be safe, not set via input.
+			$html .= sprintf( '<li%s><a href="%s">%s</a></li>' . "\n", $class, get_pagenum_link( 1 ), trim( $before_number . ' 1' ) );
+
+			if ( ! in_array( 2, $links, true ) ) {
+				$a11y_label = sprintf( '<span class="screen-reader-text">%s</span> &#x02026;', __( 'Interim pages omitted', 'genesis' ) );
+				$label      = genesis_a11y() ? $a11y_label : '&#x02026;';
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Value is known to be safe, not set via input.
+				printf( '<li class="pagination-omission">%s</li> ' . "\n", $label );
+			}
+		}
+
+		// Link to current page, plus 2 pages in either direction if necessary.
+		sort( $links );
+		foreach ( (array) $links as $link ) {
+			$class = '';
+			$aria  = '';
+			if ( $paged === $link ) {
+				$class = ' class="active" ';
+				$aria  = ' aria-label="' . esc_attr__( 'Current page', 'genesis' ) . '" aria-current="page"';
+			}
+
+			$html .= sprintf(
+				'<li%s><a href="%s"%s>%s</a></li>' . "\n",
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Value is safe, not set via input.
+				$class,
+				esc_url( get_pagenum_link( $link ) ),
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Value is safe, not set via input.
+				$aria,
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Value is safe, not set via input.
+				trim( $before_number . ' ' . $link )
+			);
+		}
+
+		// Link to last page, plus ellipses if necessary.
+		if ( ! in_array( $max, $links, true ) ) {
+
+			if ( ! in_array( $max - 1, $links, true ) ) {
+				$a11y_label = sprintf( '<span class="screen-reader-text">%s</span> &#x02026;', __( 'Interim pages omitted', 'genesis' ) );
+				$label      = genesis_a11y() ? $a11y_label : '&#x02026;';
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Value is known to be safe, not set via input.
+				$html .= sprintf( '<li class="pagination-omission">%s</li> ' . "\n", $label );
+			}
+
+			$class = $paged === $max ? ' class="active"' : '';
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Value is safe, not set via input.
+			$html .= sprintf( '<li%s><a href="%s">%s</a></li>' . "\n", $class, get_pagenum_link( $max ), trim( $before_number . ' ' . $max ) );
+		}
+
+		// Next Post Link.
+		if ( get_next_posts_link() ) {
+			$ally_label = __( '<span class="screen-reader-text">Go to</span> Next Page', 'genesis' );
+			$label      = genesis_a11y() ? $ally_label : __( 'Next Page', 'genesis' );
+			$link       = get_next_posts_link( apply_filters( 'genesis_next_link_text', $label . ' &#x000BB;' ) );
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Value is hardcoded and safe, not set via input.
+			$html .= sprintf( '<li class="pagination-next">%s</li>' . "\n", $link );
+		}
+
+		$html .= '</ul>';
+		$html .= genesis_markup(
+			[
+				'close'   => '</div>',
+				'context' => 'archive-pagination',
+				'echo'    => false,
+			]
+		);
+
+		$html .= "\n";
+
+		return $html;
 	}
 
 	function sanitize_taxonomies( $taxonomies ) {

@@ -16,8 +16,13 @@ function mait_load_more_posts() {
 		return;
 	}
 
-	$testimonials = new Mai_Testimonials( $_POST['block_args'] );
-	$block        = $testimonials->get();
+	$args         = wp_unslash( $_POST['block_args'] );
+	$args         = json_decode( $args, true );
+	$testimonials = new Mai_Testimonials( $args );
+	$data         = [
+		'block' => $testimonials->get(),
+		'paged' => $args['paged'],
+	];
 
 	// ray( $_POST );
 	// $query_args = json_decode( $_POST['query_args'] );
@@ -34,7 +39,7 @@ function mait_load_more_posts() {
 	// $result .= '</div>';
 
 	// Make your array as json
-	wp_send_json_success( $block );
+	wp_send_json_success( $data );
 
 	// Don't forget to stop execution afterward.
 	wp_die();

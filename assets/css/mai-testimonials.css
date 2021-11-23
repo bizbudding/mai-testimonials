@@ -116,3 +116,7 @@
 	--testimonial-border: var(--border);
 	--testimonial-box-shadow: var(--shadow);
 }
+
+.mai-testimonials-hidden {
+	display: none;
+}

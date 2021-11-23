@@ -1,13 +1,17 @@
 ( function() {
 
 	var getTestimonials = function( event ) {
-		// event.target
+		event.preventDefault();
 
-		const block     = event.target.closest( '.mai-testimonials' );
-		const blockArgs = block.getAttribute( 'data-args' );
-		const queryArgs = block.getAttribute( 'data-query' );
+		var slider    = event.target.closest( '.mai-testimonials-slider' );
+		var block     = slider.querySelector( '.mai-testimonials' );
+		var blockArgs = JSON.parse( block.getAttribute( 'data-args' ) );
+		// const queryArgs = block.getAttribute( 'data-query' );
 
-		// console.log( queryArgs );
+		blockArgs.paged = event.target.getAttribute( 'data-paged' );
+
+		console.log( blockArgs.paged );
+		// console.log( event.target.getAttribute( 'data-paged' ) );
 		// console.log( JSON.stringify( queryArgs ) );
 
 		// const urlArgs   = {
@@ -23,8 +27,8 @@
 			action: 'mait_load_more_posts',
 			nonce: maiTestimonialsVars.nonce,
 			// query_args: JSON.stringify( queryArgs ),
-			block_args: blockArgs,
-			query_args: queryArgs,
+			block_args: JSON.stringify( blockArgs ),
+			// query_args: queryArgs,
 		};
 
 		// var data = new FormData();
@@ -55,15 +59,33 @@
 		.then( (response) => response.json() )
 		// .then( (response) => response.text() )
 		.then( (data) => {
-
 			console.log( data );
 
 			if ( data.success ) {
-				var div = document.createElement( 'div' );
-				div.innerHTML = data.data.trim();
+				var existing = slider.querySelector( '.mai-testimonials[data-paged="' + data.data.paged + '"]' );
 
-				// Change this to div.childNodes to support multiple top-level nodes
-				block.parentNode.append( div.firstChild );
+				if ( existing ) {
+					existing.classList.remove( 'mai-testimonials-hidden' );
+				} else {
+					var div = document.createElement( 'div' );
+					div.innerHTML = data.data.block.trim();
+					slider.append( div.firstChild );
+				}
+
+				var sliders = slider.querySelectorAll( '.mai-testimonials:not([data-paged="' + data.data.paged + '"])' );
+
+				sliders.forEach( function( toHide ) {
+					toHide.classList.add( 'mai-testimonials-hidden' )
+				});
+
+				// slider.querySelector( '.mai-testimonials[data-paged="' + data.data.paged + '"]' ).classList.remove( 'mai-testimonials-hidden' );
+
+				// Add event listener for new sliders.
+				var sliderButtons = document.querySelectorAll( '.testimonials-pagination-button' );
+
+				sliderButtons.forEach( function( sliderButton ) {
+					sliderButton.addEventListener( 'click', getTestimonials, false );
+				});
 			}
 
 			// Initialize the DOM parser
@@ -85,7 +107,7 @@
 		});
 	};
 
-	var sliderButtons = document.querySelectorAll( '.mai-testimonials-button' );
+	var sliderButtons = document.querySelectorAll( '.testimonials-pagination-button' );
 
 	sliderButtons.forEach( function( sliderButton ) {
 		sliderButton.addEventListener( 'click', getTestimonials, false );
