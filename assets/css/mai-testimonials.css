@@ -140,6 +140,17 @@
 	--testimonial-box-shadow: var(--shadow);
 }
 
+.mait-loading {
+	z-index: 0;
+}
+
+.mait-loading .mait-inner {
+	opacity: 0.5;
+	filter: blur(2px);
+	-webkit-animation: maitsliderloading 0.5s;
+	animation: maitsliderloading 0.5s;
+}
+
 .mait-visible {
 	z-index: 1;
 	opacity: 1;
@@ -152,6 +163,40 @@
 	opacity: 0;
 	-webkit-animation: maitsliderfadeout 0.5s;
 	animation: maitsliderfadeout 0.5s;
+}
+
+@-webkit-keyframes maitsliderloading {
+
+	0% {
+		opacity: 1;
+		filter: blur(0);
+	}
+
+	50% {
+		filter: blur(0);
+	}
+
+	100% {
+		opacity: 0.5;
+		filter: blur(2px);
+	}
+}
+
+@keyframes maitsliderloading {
+
+	0% {
+		opacity: 1;
+		filter: blur(0);
+	}
+
+	50% {
+		filter: blur(0);
+	}
+
+	100% {
+		opacity: 0.5;
+		filter: blur(2px);
+	}
 }
 
 @-webkit-keyframes maitsliderfadein {

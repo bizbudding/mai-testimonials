@@ -2,6 +2,7 @@
 
 	var allSliders    = document.querySelectorAll( '.mait-slider' );
 	var sliderButtons = document.querySelectorAll( '.mait-button' );
+	var hasFocus      = false;
 	var prevPage      = 1;
 	var nextPage      = 1;
 	var paged         = 1;
@@ -25,6 +26,10 @@
 			nonce: maiTestimonialsVars.nonce,
 			block_args: JSON.stringify( args ),
 		};
+
+		var current = slider.querySelector( '.mait-visible' );
+
+		current.classList.add( 'mait-loading' );
 
 		fetch( maiTestimonialsVars.ajaxurl, {
 			method: "POST",
@@ -74,6 +79,10 @@
 				slider.setAttribute( 'data-paged', paged );
 				slider.querySelector( '.mait-previous' ).setAttribute( 'data-paged', prevPage );
 				slider.querySelector( '.mait-next' ).setAttribute( 'data-paged', nextPage );
+
+				setTimeout( function() {
+					current.classList.remove( 'mait-loading' );
+				}, 500 )
 			}
 		})
 		.catch( (error) => {
@@ -93,24 +102,29 @@
 			e = e || window.event;
 
 			var slider = event.target.closest( '.mait-slider' );
-			var args   = JSON.parse( slider.getAttribute( 'data-args' ) );
-			var keys   = [ 'ArrowLeft', 'ArrowRight' ];
 
-			if ( keys.includes( e.key ) ) {
+			// console.log( slider === document.activeElement );
 
-				switch (e.key) {
-					case 'ArrowLeft':
-						paged = prevPage;
-					break;
-					case 'ArrowRight':
-						paged = nextPage;
-					break;
+			// if ( slider === document.activeElement ) {
+				var args   = JSON.parse( slider.getAttribute( 'data-args' ) );
+				var keys   = [ 'ArrowLeft', 'ArrowRight' ];
+
+				if ( keys.includes( e.key ) ) {
+
+					switch (e.key) {
+						case 'ArrowLeft':
+							paged = prevPage;
+						break;
+						case 'ArrowRight':
+							paged = nextPage;
+						break;
+					}
+
+					args.paged = paged;
+
+					getSlide( slider, args );
 				}
-
-				args.paged = paged;
-
-				getSlide( slider, args );
-			}
+			// }
 		};
 	};
 
@@ -133,12 +147,17 @@
 	 * @return void
 	 */
 	allSliders.forEach( function( slider ) {
+		// console.log( slider === document.activeElement );
+		// if ( slider === document.activeElement ) {
+
 		slider.addEventListener( 'focusin', handleArrowKeys );
 
 		// TODO: When focus out of slider we need to remove focusin listener somehow.
 
 		// slider.addEventListener( 'focusout', function( event ) {
-		// 	slider.removeEventListener(	'focusin', handleArrowKeys );
+		// 	hasFocus = false;
+		// 	alert( hasFocus );
+		// 	// slider.removeEventListener(	'focusin', handleArrowKeys );
 		// });
 	});
 

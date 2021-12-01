@@ -299,6 +299,11 @@ class Mai_Testimonials {
 			'style' => '',
 		];
 
+		// Visible.
+		if ( $this->args['slider'] && 1 === $this->args['paged'] ) {
+			$attributes['class'] .= ' mait-visible';
+		}
+
 		// Boxed.
 		if ( $this->args['boxed'] ) {
 			$attributes['class'] .= ' has-boxed';
