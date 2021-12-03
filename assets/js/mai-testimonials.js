@@ -1,5 +1,4 @@
 ( function() {
-
 	var allSliders    = document.querySelectorAll( '.mait-slider' );
 	var sliderButtons = document.querySelectorAll( '.mait-button' );
 	var hasFocus      = false;
@@ -7,8 +6,15 @@
 	var nextPage      = 1;
 	var paged         = 1;
 
+	/**
+	 * Gets testimonials.
+	 */
 	var getTestimonials = function( event ) {
 		event.preventDefault();
+
+		if ( event.target.getAttribute( 'data-disabled' ) ) {
+			return;
+		}
 
 		var slider   = event.target.closest( '.mait-slider' );
 		var args     = JSON.parse( slider.getAttribute( 'data-args' ) );
@@ -20,17 +26,23 @@
 		getSlide( slider, args );
 	};
 
+	/**
+	 * Fetches testimonials via ajax.
+	 */
 	var getSlide = function( slider, args ) {
 		var data  = {
-			action: 'mait_load_more_posts',
+			action: 'mait_ajax_get_testimonials',
 			nonce: maiTestimonialsVars.nonce,
 			block_args: JSON.stringify( args ),
 		};
 
-		var current = slider.querySelector( '.mait-visible' );
+		var current = slider.querySelector( '.mait-testimonials:not(.mait-hidden)' );
 
 		current.classList.add( 'mait-loading' );
 
+		/**
+		 * Runs ajax.
+		 */
 		fetch( maiTestimonialsVars.ajaxurl, {
 			method: "POST",
 			credentials: 'same-origin',
@@ -51,35 +63,57 @@
 
 				if ( existing ) {
 					// Toggle visiblity classes.
-					existing.classList.add( 'mait-visible' );
 					existing.classList.remove( 'mait-hidden' );
 				} else {
-					// Build new slider.
-					var div = document.createElement( 'div' );
+					// Build new slide.
+					var div       = document.createElement( 'div' );
 					div.innerHTML = data.data.html.trim();
-					var newSlider = div.firstChild;
-
-					// Add visible class.
-					newSlider.classList.add( 'mait-visible' );
+					var slide     = div.firstChild;
 
 					// Append to the HTML.
-					slider.append( newSlider );
-
-					// Add arrow keys listener for the new slider.
-					newSlider.addEventListener( 'focusin', handleArrowKeys );
+					var last = slider.querySelector( '.mait-testimonials:last-of-type' );
+					last.after( slide );
 				}
 
+				// Hide hidden class.
 				slider.querySelectorAll( '.mait-testimonials:not([data-paged="' + paged + '"])' ).forEach( function( toHide ) {
 					toHide.classList.add( 'mait-hidden' );
-					toHide.classList.remove( 'mait-visible' );
 				});
 
+				// Set slider attributes.
 				slider.setAttribute( 'data-prev', prevPage );
 				slider.setAttribute( 'data-next', nextPage );
 				slider.setAttribute( 'data-paged', paged );
-				slider.querySelector( '.mait-previous' ).setAttribute( 'data-paged', prevPage );
-				slider.querySelector( '.mait-next' ).setAttribute( 'data-paged', nextPage );
 
+				// Enable currently disabled dot.
+				var disabled = slider.querySelector( '.mait-dot[data-disabled="true"]' );
+
+				if ( disabled ) {
+					disabled.removeAttribute( 'data-disabled' );
+					disabled.classList.remove( 'mait-current' );
+				}
+
+				// Disable current dot.
+				var dot = slider.querySelector( '.mait-dot[data-paged="' + paged + '"]' );
+
+				if ( dot ) {
+					dot.setAttribute( 'data-disabled', true );
+					dot.classList.add( 'mait-current' );
+				}
+
+				// Set prev/next attributes.
+				var prev = slider.querySelector( '.mait-previous' );
+				var next = slider.querySelector( '.mait-next' );
+
+				if ( prev ) {
+					prev.setAttribute( 'data-paged', prevPage );
+				}
+
+				if ( next ) {
+					next.setAttribute( 'data-paged', nextPage );
+				}
+
+				// Done loading.
 				setTimeout( function() {
 					current.classList.remove( 'mait-loading' );
 				}, 500 )
@@ -92,40 +126,47 @@
 
 	/**
 	 * Changes slide with arrow keys.
+	 * Only works if slider has focus.
 	 *
 	 * @since TBD
 	 *
 	 * @return void
 	 */
-	var handleArrowKeys = function( event ) {
-		document.onkeydown = function(e) {
-			e = e || window.event;
+	 var handleArrowKeys = function( event ) {
+		var focusedSlider = false;
 
-			var slider = event.target.closest( '.mait-slider' );
+		if ( document.activeElement ) {
+			if ( document.activeElement.classList.contains( 'mait-slider' ) ) {
+				focusedSlider = document.activeElement;
+			} else {
+				focusedSlider = document.activeElement.closest( '.mait-slider' );
+			}
+		}
 
-			// console.log( slider === document.activeElement );
+		console.log( document.activeElement );
 
-			// if ( slider === document.activeElement ) {
-				var args   = JSON.parse( slider.getAttribute( 'data-args' ) );
-				var keys   = [ 'ArrowLeft', 'ArrowRight' ];
+		if ( ! focusedSlider ) {
+			return;
+		}
 
-				if ( keys.includes( e.key ) ) {
+		var args = JSON.parse( focusedSlider.getAttribute( 'data-args' ) );
+		var keys = [ 'ArrowLeft', 'ArrowRight' ];
 
-					switch (e.key) {
-						case 'ArrowLeft':
-							paged = prevPage;
-						break;
-						case 'ArrowRight':
-							paged = nextPage;
-						break;
-					}
+		if ( keys.includes( event.key ) ) {
 
-					args.paged = paged;
+			switch (event.key) {
+				case 'ArrowLeft':
+					paged = prevPage;
+				break;
+				case 'ArrowRight':
+					paged = nextPage;
+				break;
+			}
 
-					getSlide( slider, args );
-				}
-			// }
-		};
+			args.paged = paged;
+
+			getSlide( focusedSlider, args );
+		}
 	};
 
 	/**
@@ -140,25 +181,12 @@
 	});
 
 	/**
-	 * Adds focusin event to change slide with arrow keys.
+	 * Adds keydown event to change slide with arrow keys.
 	 *
 	 * @since TBD
 	 *
 	 * @return void
 	 */
-	allSliders.forEach( function( slider ) {
-		// console.log( slider === document.activeElement );
-		// if ( slider === document.activeElement ) {
-
-		slider.addEventListener( 'focusin', handleArrowKeys );
-
-		// TODO: When focus out of slider we need to remove focusin listener somehow.
-
-		// slider.addEventListener( 'focusout', function( event ) {
-		// 	hasFocus = false;
-		// 	alert( hasFocus );
-		// 	// slider.removeEventListener(	'focusin', handleArrowKeys );
-		// });
-	});
+	document.body.addEventListener( 'keydown', handleArrowKeys );
 
 } )();

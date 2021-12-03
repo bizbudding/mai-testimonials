@@ -47,28 +47,29 @@ class Mai_Testimonials_Block {
 				'icon'            => 'format-quote',
 				'mode'            => 'preview',
 				'enqueue_assets' => function() {
-					// $suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-					$suffix = '';
+					$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
+					// Block.
 					wp_enqueue_style( 'mai-testimonials', MAI_TESTIMONIALS_PLUGIN_URL . "assets/css/mai-testimonials{$suffix}.css" );
 
-					// Slider.
-					wp_enqueue_script( 'mai-testimonials', MAI_TESTIMONIALS_PLUGIN_URL . "assets/js/mai-testimonials{$suffix}.js", [], MAI_TESTIMONIALS_VERSION, true );
-					wp_localize_script( 'mai-testimonials', 'maiTestimonialsVars',
-						[
-							'ajaxurl' => admin_url( 'admin-ajax.php' ),
-							'root'    => esc_url_raw( rest_url() ),
-							'nonce'   => wp_create_nonce( 'mai_testimonials_slider' ),
-						]
-					);
-
+					// Editor.
 					if ( is_admin() ) {
 						wp_enqueue_style( 'mai-testimonials-editor', MAI_TESTIMONIALS_PLUGIN_URL . "assets/css/mai-testimonials-editor{$suffix}.css" );
-						wp_enqueue_script( 'mai-testimonials-block', MAI_TESTIMONIALS_PLUGIN_URL . "assets/js/mai-testimonials-block{$suffix}.js", [ 'jquery' ], MAI_TESTIMONIALS_VERSION, true );
+					}
+					// Front end.
+					else {
+						// Slider.
+						wp_enqueue_script( 'mai-testimonials', MAI_TESTIMONIALS_PLUGIN_URL . "assets/js/mai-testimonials{$suffix}.js", [], MAI_TESTIMONIALS_VERSION, true );
+						wp_localize_script( 'mai-testimonials', 'maiTestimonialsVars',
+						[
+							'ajaxurl' => admin_url( 'admin-ajax.php' ),
+							'nonce'   => wp_create_nonce( 'mai_testimonials_slider' ),
+							]
+						);
 					}
 				},
 				'supports'        => [
-					'align' => [ 'wide', 'full' ],
+					'align' => false,
 				],
 			]
 		);
@@ -113,6 +114,8 @@ class Mai_Testimonials_Block {
 			'column_gap'             => get_field( 'column_gap' ),
 			'row_gap'                => get_field( 'row_gap' ),
 			'boxed'                  => get_field( 'boxed' ),
+			'slider'                 => get_field( 'slider' ),
+			'slider_show'            => get_field( 'slider_show' ),
 			'class'                  => isset( $block['className'] ) ? mai_add_classes( $block['className'] ) : '',
 		];
 
@@ -131,17 +134,17 @@ class Mai_Testimonials_Block {
 		acf_add_local_field_group(
 			[
 				'key'    => 'mai_testimonials_block',
-				'title'  => 'Mai Testimonials Block',
+				'title'  => __( 'Mai Testimonials Block', 'mai-testimonials' ),
 				'fields' => [
 					[
-						'key'       => 'mai_testimonials_display_tab',
-						'label'     => 'Display',
+						'key'       => 'mai_testimonials_display_tab',__(  'mai-testimonials' ),
+						'label'     => __( 'Display', 'mai-testimonials' ),
 						'type'      => 'tab',
 						'placement' => 'top',
 					],
 					[
 						'key'           => 'mai_testimonials_font_size',
-						'label'         => 'Text Size',
+						'label'         => __( 'Text Size', 'mai-testimonials' ),
 						'name'          => 'font_size',
 						'type'          => 'button_group',
 						'default_value' => 'md',
@@ -157,16 +160,16 @@ class Mai_Testimonials_Block {
 					],
 					[
 						'key'           => 'mai_testimonials_text_align',
-						'label'         => 'Text Align',
+						'label'         => __( 'Text Align', 'mai-testimonials' ),
 						'name'          => 'text_align',
 						'type'          => 'button_group',
 						'wrapper'       => [
 							'class'        => 'mai-acf-button-group',
 						],
 						'choices'       => [
-							'start'        => 'Start',
-							'center'       => 'Center',
-							'end'          => 'End',
+							'start'        => __( 'Start', 'mai-testimonials' ),
+							'center'       => __( 'Center', 'mai-testimonials' ),
+							'end'          => __( 'End', 'mai-testimonials' ),
 						],
 						'allow_null'    => 0,
 						'default_value' => 'start',
@@ -184,21 +187,21 @@ class Mai_Testimonials_Block {
 							'byline',
 						],
 						'choices'       => [
-							'image'  => 'Image',
-							'name'   => 'Name',
-							'byline' => 'Byline',
+							'image'  => __( 'Image', 'mai-testimonials' ),
+							'name'   => __( 'Name', 'mai-testimonials' ),
+							'byline' => __( 'Byline', 'mai-testimonials' ),
 						],
 					],
 					[
 						'key'               => 'mai_testimonials_image_location',
-						'label'             => 'Image location',
+						'label'             => __( 'Image location', 'mai-testimonials' ),
 						'name'              => 'image_location',
 						'type'              => 'select',
 						'default_value'     => 'inside',
 						'choices'           => [
-							'before' => 'Above content',
-							'after'  => 'Below content',
-							'inside' => 'Next to name/byline',
+							'before' => __( 'Above content', 'mai-testimonials' ),
+							'after'  => __( 'Below content', 'mai-testimonials' ),
+							'inside' => __( 'Next to name/byline', 'mai-testimonials' ),
 						],
 						'conditional_logic' => [
 							[
@@ -212,54 +215,85 @@ class Mai_Testimonials_Block {
 					],
 					[
 						'key'           => 'mai_testimonials_author_location',
-						'label'         => 'Name/byline location',
+						'label'         => __( 'Name/byline location', 'mai-testimonials' ),
 						'name'          => 'author_location',
 						'type'          => 'select',
 						'default_value' => 'after',
 						'choices'       => [
-							'before' => 'Above content',
-							'after'  => 'Below content',
+							'before' => __( 'Above content', 'mai-testimonials' ),
+							'after'  => __( 'Below content', 'mai-testimonials' ),
 						],
 					],
 					[
 						'key'     => 'mai_testimonials_boxed',
-						'label'   => 'Boxed',
+						'label'   => __( 'Boxed', 'mai-testimonials' ),
 						'name'    => 'boxed',
 						'type'    => 'true_false',
-						'message' => 'Display boxed styling',
+						'message' => __( 'Display boxed styling', 'mai-testimonials' ),
+					],
+					[
+						'key'     => 'mai_testimonials_slider',
+						'label'   => __( 'Slider', 'mai-testimonials' ),
+						'name'    => 'slider',
+						'type'    => 'true_false',
+						'message' => __( 'Enable slider', 'mai-testimonials' ),
+					],
+					[
+						'key'           => 'mai_testimonials_slider_show',
+						'label'         => __( 'Slider navigation', 'mai-testimonials' ),
+						'name'          => 'slider_show',
+						'type'          => 'checkbox',
+						'default_value' => [ 'arrows', 'dots' ],
+						'choices'       => [
+							'dots'   => __( 'Dots', 'mai-testimonials' ),
+							'arrows' => __( 'Arrows', 'mai-testimonials' ),
+						],
+						'conditional_logic' => [
+							[
+								[
+									'field'    => 'mai_testimonials_slider',
+									'operator' => '==',
+									'value'    => '1',
+								],
+							],
+						],
+					],
+					[
+						'key'               => 'mai_testimonials_slider_show_notice',
+						'label'             => '',
+						'name'              => 'slider_show_notice',
+						'type'              => 'message',
+						'message'           => sprintf( '<p style="display:block;padding:4px 8px;color:white;background:red;border-left:4px solid darkred;">%s</p>', __( 'You must show at least one slider navigation element.', 'mai-testimonials' ) ),
+						'new_lines'         => '',
+						'esc_html'          => 0,
+						'conditional_logic' => [
+							[
+								[
+									'field'    => 'mai_testimonials_slider',
+									'operator' => '==',
+									'value'    => '1',
+								],
+								[
+									'field'    => 'mai_testimonials_slider_show',
+									'operator' => '==empty',
+								],
+							],
+						],
 					],
 					[
 						'key'   => 'mai_testimonials_layout_tab',
-						'label' => 'Layout',
+						'label' => __( 'Layout', 'mai-testimonials' ),
 						'type'  => 'tab',
-					],
-					[
-						'key'           => 'mai_testimonials_columns',
-						'label'         => 'Columns',
-						'name'          => 'columns',
-						'type'          => 'button_group',
-						'default_value' => 3,
-						'choices'       => [
-							1 => 1,
-							2 => 2,
-							3 => 3,
-							4 => 4,
-							5 => 5,
-							6 => 6,
-						],
-						'wrapper'       => [
-							'class' => 'mai-acf-button-group',
-						],
 					],
 					[
 						'key'     => 'mai_testimonials_columns_responsive',
 						'name'    => 'columns_responsive',
 						'type'    => 'true_false',
-						'message' => 'Custom responsive columns',
+						'message' => __( 'Custom responsive columns', 'mai-testimonials' ),
 					],
 					[
 						'key'               => 'mai_testimonials_columns_md',
-						'label'             => 'Columns (lg tablets)',
+						'label'             => __( 'Columns (lg tablets)', 'mai-testimonials' ),
 						'name'              => 'columns_md',
 						'type'              => 'button_group',
 						'choices'           => [
@@ -285,7 +319,7 @@ class Mai_Testimonials_Block {
 					],
 					[
 						'key'               => 'mai_testimonials_columns_sm',
-						'label'             => 'Columns (md tablets)',
+						'label'             => __( 'Columns (md tablets)', 'mai-testimonials' ),
 						'name'              => 'columns_sm',
 						'type'              => 'button_group',
 						'choices'           => [
@@ -311,7 +345,7 @@ class Mai_Testimonials_Block {
 					],
 					[
 						'key'               => 'mai_testimonials_columns_xs',
-						'label'             => 'Columns (mobile)',
+						'label'             => __( 'Columns (mobile)', 'mai-testimonials' ),
 						'name'              => 'columns_xs',
 						'type'              => 'button_group',
 						'choices'           => [
@@ -337,7 +371,7 @@ class Mai_Testimonials_Block {
 					],
 					[
 						'key'     => 'mai_testimonials_align_columns',
-						'label'   => 'Align Columns',
+						'label'   => __( 'Align Columns', 'mai-testimonials' ),
 						'name'    => 'align_columns',
 						'type'    => 'button_group',
 						'choices' => [
@@ -360,14 +394,14 @@ class Mai_Testimonials_Block {
 					],
 					[
 						'key'               => 'mai_testimonials_align_columns_vertical',
-						'label'             => 'Align Columns (vertical)',
+						'label'             => __( 'Align Columns (vertical)', 'mai-testimonials' ),
 						'name'              => 'align_columns_vertical',
 						'type'              => 'button_group',
 						'choices'           => [
-							'full'   => 'Full',
-							'top'    => 'Top',
-							'middle' => 'Middle',
-							'bottom' => 'Bottom',
+							'full'   => __( 'Full', 'mai-testimonials' ),
+							'top'    => __( 'Top', 'mai-testimonials' ),
+							'middle' => __( 'Middle', 'mai-testimonials' ),
+							'bottom' => __( 'Bottom', 'mai-testimonials' ),
 						],
 						'wrapper'           => [
 							'class' => 'mai-acf-button-group',
@@ -384,17 +418,17 @@ class Mai_Testimonials_Block {
 					],
 					[
 						'key'           => 'mai_testimonials_column_gap',
-						'label'         => 'Column Gap',
+						'label'         => __( 'Column Gap', 'mai-testimonials' ),
 						'name'          => 'column_gap',
 						'type'          => 'button_group',
 						'default_value' => 'md',
 						'choices'       => [
-							''     => 'None',
-							'md'   => 'XS',
-							'lg'   => 'S',
-							'xl'   => 'M',
-							'xxl'  => 'L',
-							'xxxl' => 'XL',
+							''     => __( 'None', 'mai-testimonials' ),
+							'md'   => __( 'XS', 'mai-testimonials' ),
+							'lg'   => __( 'S', 'mai-testimonials' ),
+							'xl'   => __( 'M', 'mai-testimonials' ),
+							'xxl'  => __( 'L', 'mai-testimonials' ),
+							'xxxl' => __( 'XL', 'mai-testimonials' ),
 						],
 						'wrapper'       => [
 							'class' => 'mai-acf-button-group',
@@ -402,17 +436,17 @@ class Mai_Testimonials_Block {
 					],
 					[
 						'key'           => 'mai_testimonials_row_gap',
-						'label'         => 'Row Gap',
+						'label'         => __( 'Row Gap', 'mai-testimonials' ),
 						'name'          => 'row_gap',
 						'type'          => 'button_group',
 						'default_value' => 'md',
 						'choices'       => [
-							''     => 'None',
-							'md'   => 'XS',
-							'lg'   => 'S',
-							'xl'   => 'M',
-							'xxl'  => 'L',
-							'xxxl' => 'XL',
+							''     => __( 'None', 'mai-testimonials' ),
+							'md'   => __( 'XS', 'mai-testimonials' ),
+							'lg'   => __( 'S', 'mai-testimonials' ),
+							'xl'   => __( 'M', 'mai-testimonials' ),
+							'xxl'  => __( 'L', 'mai-testimonials' ),
+							'xxxl' => __( 'XL', 'mai-testimonials' ),
 						],
 						'wrapper'       => [
 							'class' => 'mai-acf-button-group',
@@ -420,23 +454,23 @@ class Mai_Testimonials_Block {
 					],
 					[
 						'key'   => 'mai_testimonials_entries_tab',
-						'label' => 'Entries',
+						'label' => __( 'Entries', 'mai-testimonials' ),
 						'type'  => 'tab',
 					],
 					[
 						'key'     => 'mai_testimonials_query_by',
-						'label'   => 'Get testimonials by',
+						'label'   => __( 'Get testimonials by', 'mai-testimonials' ),
 						'name'    => 'query_by',
 						'type'    => 'select',
 						'choices' => [
-							''         => 'Date',
-							'id'       => 'Choice',
-							'tax_meta' => 'Taxonomy',
+							''         => __( 'Date', 'mai-testimonials' ),
+							'id'       => __( 'Choice', 'mai-testimonials' ),
+							'tax_meta' => __( 'Taxonomy', 'mai-testimonials' ),
 						],
 					],
 					[
 						'key'               => 'mai_testimonials_number',
-						'label'             => 'Number',
+						'label'             => __( 'Number', 'mai-testimonials' ),
 						'name'              => 'number',
 						'type'              => 'number',
 						'default_value'     => 3,
@@ -453,10 +487,10 @@ class Mai_Testimonials_Block {
 					],
 					[
 						'key'               => 'mai_testimonials_include',
-						'label'             => 'Include',
+						'label'             => __( 'Include', 'mai-testimonials' ),
 						'name'              => 'include',
 						'type'              => 'post_object',
-						'instructions'      => 'Show specific testimonials.',
+						'instructions'      => __( 'Show specific testimonials.', 'mai-testimonials' ),
 						'multiple'          => 1,
 						'return_format'     => 'id',
 						'ui'                => 1,
@@ -475,13 +509,13 @@ class Mai_Testimonials_Block {
 					],
 					[
 						'key'               => 'mai_testimonials_taxonomies',
-						'label'             => 'Taxonomies',
+						'label'             => __( 'Taxonomies', 'mai-testimonials' ),
 						'name'              => 'taxonomies',
 						'type'              => 'repeater',
-						'instructions'      => 'Limit to testimonials in these taxonomies.',
+						'instructions'      => __( 'Limit to testimonials in these taxonomies.', 'mai-testimonials' ),
 						'collapsed'         => 'mai_testimonials_terms',
 						'layout'            => 'block',
-						'button_label'      => 'Add Taxonomy Condition',
+						'button_label'      => __( 'Add Taxonomy Condition', 'mai-testimonials' ),
 						'sub_fields'        => [
 							// TODO: Including ajax load taxonomy name.
 							[
@@ -496,7 +530,7 @@ class Mai_Testimonials_Block {
 							],
 							[
 								'key'      => 'mai_testimonials_terms',
-								'label'    => 'Terms',
+								'label'    => __( 'Terms', 'mai-testimonials' ),
 								'name'     => 'terms',
 								'type'     => 'select',
 								'choices'  => [],
@@ -506,12 +540,12 @@ class Mai_Testimonials_Block {
 							],
 							[
 								'key'        => 'mai_testimonials_operator',
-								'label'      => 'Operator',
+								'label'      => __( 'Operator', 'mai-testimonials' ),
 								'name'       => 'operator',
 								'type'       => 'select',
 								'choices'    => [
-									'IN'     => 'In',
-									'NOT IN' => 'Not In',
+									'IN'     => __( 'In', 'mai-testimonials' ),
+									'NOT IN' => __( 'Not In', 'mai-testimonials' ),
 								],
 							],
 						],
@@ -527,16 +561,16 @@ class Mai_Testimonials_Block {
 					],
 					[
 						'key'               => 'mai_testimonials_taxonomies_relation',
-						'label'             => 'Taxonomies Relation',
+						'label'             => __( 'Taxonomies Relation', 'mai-testimonials' ),
 						'name'              => 'taxonomies_relation',
 						'type'              => 'select',
 						'instructions'      => '',
 						'required'          => 0,
 						'default_value'     => 'AND',
 						'choices'           => [
-							'AND' => 'AND',
-							'OR'  => 'OR',
-						],
+							'AND' => __( 'AND', 'mai-testimonials' ),
+							'OR'  => __( 'OR', 'mai-testimonials' ),
+						],__(  'mai-testimonials' ),
 						'conditional_logic' => [
 							[
 								[
@@ -554,16 +588,16 @@ class Mai_Testimonials_Block {
 					],
 					[
 						'key'               => 'mai_testimonials_orderby',
-						'label'             => 'Order by',
+						'label'             => __( 'Order by', 'mai-testimonials' ),
 						'name'              => 'orderby',
 						'type'              => 'select',
 						'default_value'     => 'date',
 						'choices'           => [
-							'title'      => 'Title',
-							'date'       => 'Date',
-							'modified'   => 'Modified',
-							'rand'       => 'Random',
-							'menu_order' => 'Menu Order',
+							'title'      => __( 'Title', 'mai-testimonials' ),
+							'date'       => __( 'Date', 'mai-testimonials' ),
+							'modified'   => __( 'Modified', 'mai-testimonials' ),
+							'rand'       => __( 'Random', 'mai-testimonials' ),
+							'menu_order' => __( 'Menu Order', 'mai-testimonials' ),
 						],
 						'conditional_logic' => [
 							[
@@ -577,13 +611,13 @@ class Mai_Testimonials_Block {
 					],
 					[
 						'key'               => 'mai_testimonials_order',
-						'label'             => 'Order',
+						'label'             => __( 'Order', 'mai-testimonials' ),
 						'name'              => 'order',
 						'type'              => 'select',
 						'default_value'     => 'ASC',
 						'choices'           => [
-							'ASC'  => 'ASC',
-							'DESC' => 'DESC',
+							'ASC'  => __( 'ASC', 'mai-testimonials' ),
+							'DESC' => __( 'DESC', 'mai-testimonials' ),
 						],
 						'conditional_logic' => [
 							[
@@ -597,10 +631,10 @@ class Mai_Testimonials_Block {
 					],
 					[
 						'key'               => 'mai_testimonials_exclude',
-						'label'             => 'Exclude',
+						'label'             => __( 'Exclude', 'mai-testimonials' ),
 						'name'              => 'exclude',
 						'type'              => 'post_object',
-						'instructions'      => 'Exclude specific testimonials.',
+						'instructions'      => __( 'Exclude specific testimonials.', 'mai-testimonials' ),
 						'multiple'          => 1,
 						'return_format'     => 'id',
 						'ui'                => 1,
