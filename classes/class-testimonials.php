@@ -12,6 +12,7 @@ class Mai_Testimonials {
 	public $has_name;
 	public $has_byline;
 	public $has_slider;
+	public $slider_max;
 
 	function __construct( $args ) {
 		$args = wp_parse_args( $args,
@@ -42,6 +43,7 @@ class Mai_Testimonials {
 				'boxed'                  => '',
 				'slider'                 => false,
 				'slider_show'            => [ 'arrows', 'dots' ],
+				'slider_max'             => 0,
 				'class'                  => '',
 			]
 		);
@@ -74,6 +76,7 @@ class Mai_Testimonials {
 			'boxed'                  => mai_sanitize_bool( $args['boxed'] ),
 			'slider'                 => mai_sanitize_bool( $args['slider'] ),
 			'slider_show'            => array_map( 'esc_html', (array) $args['slider_show'] ),
+			'slider_max'             => absint( $args['slider_max'] ),
 			'class'                  => esc_html( $args['class'] ),
 		];
 
@@ -105,7 +108,6 @@ class Mai_Testimonials {
 		$query = new WP_Query( $this->query_args );
 
 		if ( $query->have_posts() ) {
-
 			$this->prev = $this->get_prev_page( $query );
 			$this->next = $this->get_next_page( $query );
 
@@ -175,12 +177,18 @@ class Mai_Testimonials {
 			$html .= '</div>';
 
 			if ( $this->has_slider && 1 === $this->args['paged'] ) {
-				if ( in_array( 'dots', $this->args['slider_show'] ) ) {
-					$html .= $this->get_dots( $query );
-				}
+				// Slider max. If slider_max has a value, use the lesser of that or max from the query. Otherwise use max from query.
+				$this->slider_max = $this->args['slider_max'] ? min( $this->args['slider_max'], (int) $query->max_num_pages ) : (int) $query->max_num_pages;
 
-				if ( in_array( 'arrows', $this->args['slider_show'] ) ) {
-					$html .= $this->get_arrows( $query );
+				// If more than one page.
+				if ( $this->slider_max > 1 ) {
+					if ( in_array( 'dots', $this->args['slider_show'] ) ) {
+						$html .= $this->get_dots( $query );
+					}
+
+					if ( in_array( 'arrows', $this->args['slider_show'] ) ) {
+						$html .= $this->get_arrows( $query );
+					}
 				}
 
 				$html .= genesis_markup(
@@ -218,11 +226,6 @@ class Mai_Testimonials {
 
 			if ( $this->args['number'] ) {
 				$query_args['posts_per_page'] = $this->args['number'];
-
-				// Offset for slider.
-				// if ( $this->args['paged'] ) {
-				// 	$query_args['offset'] = (int) $query_args['posts_per_page'] * (int) $this->args['paged'];
-				// }
 			}
 
 			if ( $this->args['orderby'] ) {
@@ -240,9 +243,10 @@ class Mai_Testimonials {
 		} else {
 
 			if ( $this->args['include'] ) {
-				$query_args['posts_per_page'] = count( $this->args['include'] );
-				$query_args['post__in']       = $this->args['include'];
-				$query_args['order']          = 'post__in';
+				$query_args['posts_per_page'] = $this->args['slider'] ? $this->args['number'] : count( $this->args['include'] );
+				$query_args['post__in']       = $this->args['include'] ?: [ -1 ]; // Empty array returns all posts, array(-1) prevents this.
+				$query_args['orderby']        = 'post__in';
+				$query_args['order']          = 'ASC';
 			}
 		}
 
@@ -278,16 +282,6 @@ class Mai_Testimonials {
 					$query_args['tax_query']['relation'] = $this->args['taxonomies_relation'];
 				}
 			}
-		}
-
-		// Orderby.
-		if ( 'id' !== $this->args['query_by'] && $this->args['orderby'] ) {
-			$query_args['orderby'] = $this->args['orderby'];
-		}
-
-		// Order.
-		if ( $this->args['order'] ) {
-			$query_args['order'] = $this->args['order'];
 		}
 
 		return $query_args;
@@ -422,22 +416,15 @@ class Mai_Testimonials {
 	 * @return string
 	 */
 	function get_dots( $query ) {
-		$max = (int) $query->max_num_pages;
+		$html = '';
 
-		// Stop execution if there's only one page.
-		if ( $max <= 1 ) {
-			return;
-		}
-
-		$content = '';
-
-		for( $i = 0; $i < $max; $i++ ) {
+		for( $i = 0; $i < $this->slider_max; $i++ ) {
 			$paged    = $i + 1;
 			$text     = sprintf( '<span class="screen-reader-text">%s %s</span>', __( 'Go to page', 'genesis' ), $i );
 			$current  = (int) $paged === (int) $this->args['paged'];
 			$current  = $current ? ' mait-current' : '';
 			$disabled = $current ? ' data-disabled="true"' : '';
-			$content .= sprintf( '<li><button class="mait-dot mait-button%s" data-paged="%s"%s>%s</button>', $current, $paged, $disabled, $text );
+			$html    .= sprintf( '<li><button class="mait-dot mait-button%s" data-paged="%s"%s>%s</button>', $current, $paged, $disabled, $text );
 		}
 
 		return genesis_markup(
@@ -445,7 +432,7 @@ class Mai_Testimonials {
 				'open'    => '<ul %s>',
 				'close'   => '</ul>',
 				'context' => 'testimonials-dots',
-				'content' => $content,
+				'content' => $html,
 				'echo'    => false,
 				'atts'    => [
 					'class'      => 'mait-dots',
