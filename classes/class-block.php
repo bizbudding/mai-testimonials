@@ -55,6 +55,7 @@ class Mai_Testimonials_Block {
 					// Editor.
 					if ( is_admin() ) {
 						wp_enqueue_style( 'mai-testimonials-editor', MAI_TESTIMONIALS_PLUGIN_URL . "assets/css/mai-testimonials-editor{$suffix}.css" );
+						wp_enqueue_script( 'mai-testimonials-editor', MAI_TESTIMONIALS_PLUGIN_URL . "assets/js/mai-testimonials-editor{$suffix}.js", [], MAI_TESTIMONIALS_VERSION, true );
 					}
 					// Front end.
 					else {
@@ -116,6 +117,7 @@ class Mai_Testimonials_Block {
 			'boxed'                  => get_field( 'boxed' ),
 			'slider'                 => get_field( 'slider' ),
 			'slider_show'            => get_field( 'slider_show' ),
+			'slider_max'             => get_field( 'slider_max' ),
 			'class'                  => isset( $block['className'] ) ? mai_add_classes( $block['className'] ) : '',
 		];
 
@@ -232,58 +234,27 @@ class Mai_Testimonials_Block {
 						'message' => __( 'Display boxed styling', 'mai-testimonials' ),
 					],
 					[
-						'key'     => 'mai_testimonials_slider',
-						'label'   => __( 'Slider', 'mai-testimonials' ),
-						'name'    => 'slider',
-						'type'    => 'true_false',
-						'message' => __( 'Enable slider', 'mai-testimonials' ),
-					],
-					[
-						'key'           => 'mai_testimonials_slider_show',
-						'label'         => __( 'Slider navigation', 'mai-testimonials' ),
-						'name'          => 'slider_show',
-						'type'          => 'checkbox',
-						'default_value' => [ 'arrows', 'dots' ],
-						'choices'       => [
-							'dots'   => __( 'Dots', 'mai-testimonials' ),
-							'arrows' => __( 'Arrows', 'mai-testimonials' ),
-						],
-						'conditional_logic' => [
-							[
-								[
-									'field'    => 'mai_testimonials_slider',
-									'operator' => '==',
-									'value'    => '1',
-								],
-							],
-						],
-					],
-					[
-						'key'               => 'mai_testimonials_slider_show_notice',
-						'label'             => '',
-						'name'              => 'slider_show_notice',
-						'type'              => 'message',
-						'message'           => sprintf( '<p style="display:block;padding:4px 8px;color:white;background:red;border-left:4px solid darkred;">%s</p>', __( 'You must show at least one slider navigation element.', 'mai-testimonials' ) ),
-						'new_lines'         => '',
-						'esc_html'          => 0,
-						'conditional_logic' => [
-							[
-								[
-									'field'    => 'mai_testimonials_slider',
-									'operator' => '==',
-									'value'    => '1',
-								],
-								[
-									'field'    => 'mai_testimonials_slider_show',
-									'operator' => '==empty',
-								],
-							],
-						],
-					],
-					[
 						'key'   => 'mai_testimonials_layout_tab',
 						'label' => __( 'Layout', 'mai-testimonials' ),
 						'type'  => 'tab',
+					],
+					[
+						'key'           => 'mai_testimonials_columns',
+						'label'         => 'Columns',
+						'name'          => 'columns',
+						'type'          => 'button_group',
+						'default_value' => 3,
+						'choices'       => [
+							1 => 1,
+							2 => 2,
+							3 => 3,
+							4 => 4,
+							5 => 5,
+							6 => 6,
+						],
+						'wrapper'       => [
+							'class' => 'mai-acf-button-group',
+						]
 					],
 					[
 						'key'     => 'mai_testimonials_columns_responsive',
@@ -370,16 +341,17 @@ class Mai_Testimonials_Block {
 						],
 					],
 					[
-						'key'     => 'mai_testimonials_align_columns',
-						'label'   => __( 'Align Columns', 'mai-testimonials' ),
-						'name'    => 'align_columns',
-						'type'    => 'button_group',
-						'choices' => [
+						'key'               => 'mai_testimonials_align_columns',
+						'label'             => __( 'Align Columns', 'mai-testimonials' ),
+						'name'              => 'align_columns',
+						'type'              => 'button_group',
+						'default_value'     => 'center',
+						'choices'           => [
 							'start'  => 'Start',
 							'center' => 'Center',
 							'end'    => 'End',
 						],
-						'wrapper' => [
+						'wrapper'           => [
 							'class' => 'mai-acf-button-group',
 						],
 						'conditional_logic' => [
@@ -470,7 +442,7 @@ class Mai_Testimonials_Block {
 					],
 					[
 						'key'               => 'mai_testimonials_number',
-						'label'             => __( 'Number', 'mai-testimonials' ),
+						'label'             => __( 'Number to display', 'mai-testimonials' ),
 						'name'              => 'number',
 						'type'              => 'number',
 						'default_value'     => 3,
@@ -481,6 +453,13 @@ class Mai_Testimonials_Block {
 									'field'    => 'mai_testimonials_query_by',
 									'operator' => '!=',
 									'value'    => 'id',
+								],
+							],
+							[
+								[
+									'field'    => 'mai_testimonials_slider',
+									'operator' => '==',
+									'value'    => '1',
 								],
 							],
 						],
@@ -647,6 +626,72 @@ class Mai_Testimonials_Block {
 									'field'    => 'mai_testimonials_query_by',
 									'operator' => '!=',
 									'value'    => 'id',
+								],
+							],
+						],
+					],
+					[
+						'key'     => 'mai_testimonials_slider',
+						'label'   => __( 'Slider', 'mai-testimonials' ),
+						'name'    => 'slider',
+						'type'    => 'true_false',
+						'message' => __( 'Enable slider', 'mai-testimonials' ),
+					],
+					[
+						'key'           => 'mai_testimonials_slider_show',
+						'label'         => __( 'Slider navigation', 'mai-testimonials' ),
+						'name'          => 'slider_show',
+						'type'          => 'checkbox',
+						'default_value' => [ 'arrows', 'dots' ],
+						'choices'       => [
+							'dots'   => __( 'Dots', 'mai-testimonials' ),
+							'arrows' => __( 'Arrows', 'mai-testimonials' ),
+						],
+						'conditional_logic' => [
+							[
+								[
+									'field'    => 'mai_testimonials_slider',
+									'operator' => '==',
+									'value'    => '1',
+								],
+							],
+						],
+					],
+					[
+						'key'               => 'mai_testimonials_slider_show_notice',
+						'label'             => '',
+						'name'              => 'slider_show_notice',
+						'type'              => 'message',
+						'message'           => sprintf( '<p style="display:block;padding:4px 8px;color:white;background:red;border-left:4px solid darkred;">%s</p>', __( 'You must show at least one slider navigation element.', 'mai-testimonials' ) ),
+						'new_lines'         => '',
+						'esc_html'          => 0,
+						'conditional_logic' => [
+							[
+								[
+									'field'    => 'mai_testimonials_slider',
+									'operator' => '==',
+									'value'    => '1',
+								],
+								[
+									'field'    => 'mai_testimonials_slider_show',
+									'operator' => '==empty',
+								],
+							],
+						],
+					],
+					[
+						'key'               => 'mai_testimonials_slider_max',
+						'label'             => __( 'Max number of slides', 'mai-testimonials' ),
+						'instructions'      => __( 'Use 0 to show all', 'mai-testimonials' ),
+						'name'              => 'slider_max',
+						'type'              => 'number',
+						'default_value'     => 0,
+						'conditional_logic' => [
+							[
+								[
+									'field'    => 'mai_testimonials_slider',
+									'operator' => '==',
+									'value'    => '1',
 								],
 							],
 						],

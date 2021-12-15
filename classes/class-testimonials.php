@@ -91,10 +91,24 @@ class Mai_Testimonials {
 		$this->has_slider = $this->args['slider'] && count( $this->args['slider_show'] ) >= 1;
 	}
 
+	/**
+	 * Displays testimonials.
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
 	function render() {
 		echo $this->get();
 	}
 
+	/**
+	 * Gets testimonials.
+	 *
+	 * @since TBD
+	 *
+	 * @return string
+	 */
 	function get() {
 		if ( 'id' !== $this->args['query_by'] && ! $this->args['number'] ) {
 			return;
@@ -209,6 +223,13 @@ class Mai_Testimonials {
 		return $html;
 	}
 
+	/**
+	 * Gets query args for WP_Query.
+	 *
+	 * @since TBD
+	 *
+	 * @return array
+	 */
 	function get_query_args() {
 		$query_args = [
 			'post_type'              => 'testimonial',
@@ -287,6 +308,13 @@ class Mai_Testimonials {
 		return $query_args;
 	}
 
+	/**
+	 * Gets openin markup.
+	 *
+	 * @since TBD
+	 *
+	 * @return string
+	 */
 	function get_open() {
 		$attributes = [
 			'class' => mai_add_classes( 'mait-testimonials', $this->args['class'] ),
@@ -358,6 +386,13 @@ class Mai_Testimonials {
 		);
 	}
 
+	/**
+	 * Gets inner markup opening.
+	 *
+	 * @since TBD
+	 *
+	 * @return string
+	 */
 	function get_inner() {
 		return genesis_markup(
 			[
@@ -372,6 +407,17 @@ class Mai_Testimonials {
 		);
 	}
 
+	/**
+	 * Gets details.
+	 *
+	 * @since TBD
+	 *
+	 * @param string $image  Image value.
+	 * @param string $name   Name value.
+	 * @param string $byline Byline value.
+	 *
+	 * @return string
+	 */
 	function get_details( $image = '', $name = '', $byline = '' ) {
 		$html = '';
 
@@ -404,7 +450,6 @@ class Mai_Testimonials {
 			]
 		);
 	}
-
 
 	/**
 	 * Gets pagination dots.
@@ -447,6 +492,10 @@ class Mai_Testimonials {
 	 * Gets prev/next slide arrows.
 	 *
 	 * @since TBD
+	 *
+	 * @param WP_Query $query Query object.
+	 *
+	 * @return string
 	 */
 	function get_arrows( $query ) {
 		$html      = '';
@@ -463,18 +512,49 @@ class Mai_Testimonials {
 		return $html;
 	}
 
+	/**
+	 * Gets previous arrow.
+	 *
+	 * @since TBD
+	 *
+	 * @param WP_Query $query Query object.
+	 *
+	 * @return string
+	 */
 	function get_previous_arrow( $query ) {
+		$icon     = apply_filters( 'mai_testimonials_previous_arrow', '←' );
 		$classes  = 'mait-button mait-previous';
 		$classes .= is_admin() ? ' button' : '';
-		return sprintf( '<button class="%s" data-paged="%s">%s</button>', $classes, $this->get_prev_page( $query ), '←' );
+
+		return sprintf( '<button class="%s" data-paged="%s">%s</button>', $classes, $this->get_prev_page( $query ), wp_kses_post( $icon ) );
 	}
 
+	/**
+	 * Gets next arrow.
+	 *
+	 * @since TBD
+	 *
+	 * @param WP_Query $query Query object.
+	 *
+	 * @return string
+	 */
 	function get_next_arrow( $query ) {
+		$icon     = apply_filters( 'mai_testimonials_previous_arrow', '→' );
 		$classes  = 'mait-button mait-next';
 		$classes .= is_admin() ? ' button' : '';
-		return sprintf( '<button class="%s" data-paged="%s">%s</button>', $classes, $this->get_next_page( $query ), '→ ' );
+
+		return sprintf( '<button class="%s" data-paged="%s">%s</button>', $classes, $this->get_next_page( $query ), wp_kses_post( $icon ) );
 	}
 
+	/**
+	 * Gets previous page number.
+	 *
+	 * @since TBD
+	 *
+	 * @param WP_Query $query Query object.
+	 *
+	 * @return int
+	 */
 	function get_prev_page( $query ) {
 		$page = (int) $this->args['paged'] - 1;
 
@@ -485,6 +565,15 @@ class Mai_Testimonials {
 		return $page;
 	}
 
+	/**
+	 * Gets next page number.
+	 *
+	 * @since TBD
+	 *
+	 * @param WP_Query $query Query object.
+	 *
+	 * @return int
+	 */
 	function get_next_page( $query ) {
 		$page = (int) $this->args['paged'] + 1;
 
@@ -495,6 +584,15 @@ class Mai_Testimonials {
 		return $page;
 	}
 
+	/**
+	 * Sanitizes taxonomies.
+	 *
+	 * @since TBD
+	 *
+	 * @param array
+	 *
+	 * @return array
+	 */
 	function sanitize_taxonomies( $taxonomies ) {
 		if ( ! $taxonomies ) {
 			return $taxonomies;

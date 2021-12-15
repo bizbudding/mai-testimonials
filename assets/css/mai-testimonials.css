@@ -12,6 +12,46 @@
 	grid-area: testimonials;
 }
 
+.mait-inner {
+	--testimonial-margin: var(--row-gap) 0 0 var(--column-gap);
+	display: flex;
+	flex-wrap: wrap;
+	align-items: var(--align-columns-vertical, unset);
+	justify-content: var(--align-columns, unset);
+	width: calc(100% + var(--column-gap));
+	max-width: var(--testimonials-inner-max-width, calc(100% + var(--column-gap)));
+	margin: calc(var(--row-gap) * -1) 0 0 calc(var(--column-gap) * -1);
+	line-height: 1.5;
+}
+
+@media only screen and (max-width: 599px) {
+
+	.mait-inner {
+		--columns: var(--columns-xs);
+	}
+}
+
+@media only screen and (min-width: 600px) and (max-width: 799px) {
+
+	.mait-inner {
+		--columns: var(--columns-sm);
+	}
+}
+
+@media only screen and (min-width: 800px) and (max-width: 999px) {
+
+	.mait-inner {
+		--columns: var(--columns-md);
+	}
+}
+
+@media only screen and (min-width: 1000px) {
+
+	.mait-inner {
+		--columns: var(--columns-lg);
+	}
+}
+
 .mait-testimonial {
 	position: var(--testimonial-position, static);
 	flex: var(--testimonial-flex, 1 1 calc((100% / var(--columns)) - var(--column-gap)));
