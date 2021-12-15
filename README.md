@@ -5,7 +5,7 @@
 1. Create a "Page" called "Testimonials".
 
 ## Mai Theme v2
-1. Add a Mai Post Grid block and modifiy setting as you'd like. Make sure the Entries tab has Favorites as the Post Type.
+1. Add a Mai Testimonials block (or Mai Post Grid block set to display Testimonials on the Entries tab) and modify the settings as you'd like.
 
 ## Mai Theme v1/Classic
 1. Add a shortcode [grid content="testimonial" number="all" columns="2"] and modify grid parameters as you'd like.
