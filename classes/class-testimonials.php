@@ -58,7 +58,7 @@ class Mai_Testimonials {
 			'show'                   => array_map( 'esc_html', (array) $args['show'] ),
 			'query_by'               => esc_html( $args['query_by'] ),
 			'number'                 => absint( $args['number'] ),
-			'include'                => $args['include'] ? array_map( 'absint', (array) $args['include'] ) : [],
+			'include'                => $args['include'] ? array_map( 'absint', (array) $args['include'] ) : [-1], // Empty array returns all posts, [-1] prevents this.
 			'taxonomies'             => $this->sanitize_taxonomies( $args['taxonomies'] ),
 			'taxonomies_relation'    => esc_html( $args['taxonomies_relation'] ),
 			'orderby'                => esc_html( $args['orderby'] ),
@@ -191,8 +191,14 @@ class Mai_Testimonials {
 			$html .= '</div>';
 
 			if ( $this->has_slider && 1 === $this->args['paged'] ) {
-				// Slider max. If slider_max has a value, use the lesser of that or max from the query. Otherwise use max from query.
-				$this->slider_max = $this->args['slider_max'] ? min( $this->args['slider_max'], (int) $query->max_num_pages ) : (int) $query->max_num_pages;
+				// Slider max.
+				if ( 'id' === $this->args['query_by'] ) {
+					// If by choice, the max slides is the number chosen divided by the number displayed, rounded up.
+					$this->slider_max = absint( ceil( count( $this->args['include'] ) / $this->args['number'] ) );
+				} else {
+					// If slider_max has a value, use the lesser of that or max from the query. Otherwise use max from query.
+					$this->slider_max = $this->args['slider_max'] ? min( $this->args['slider_max'], (int) $query->max_num_pages ) : (int) $query->max_num_pages;
+				}
 
 				// If more than one page.
 				if ( $this->slider_max > 1 ) {
@@ -231,8 +237,12 @@ class Mai_Testimonials {
 	 * @return array
 	 */
 	function get_query_args() {
+		$per_page = ( 0 === $this->args['number'] ) ? -1 : $this->args['number'];
+		$per_page = ( 'id' === $this->args['query_by'] ) ? count( (array) $this->args['include'] ) : $per_page;
+
 		$query_args = [
 			'post_type'              => 'testimonial',
+			'posts_per_page'         => $per_page,
 			'no_found_rows'          => ! $this->args['paged'],
 			'update_post_meta_cache' => false,
 			'update_post_term_cache' => false,
@@ -244,10 +254,6 @@ class Mai_Testimonials {
 		}
 
 		if ( 'id' !== $this->args['query_by'] ) {
-
-			if ( $this->args['number'] ) {
-				$query_args['posts_per_page'] = $this->args['number'];
-			}
 
 			if ( $this->args['orderby'] ) {
 				$query_args['orderby'] = $this->args['orderby'];
@@ -265,7 +271,7 @@ class Mai_Testimonials {
 
 			if ( $this->args['include'] ) {
 				$query_args['posts_per_page'] = $this->args['slider'] ? $this->args['number'] : count( $this->args['include'] );
-				$query_args['post__in']       = $this->args['include'] ?: [ -1 ]; // Empty array returns all posts, array(-1) prevents this.
+				$query_args['post__in']       = $this->args['include'];
 				$query_args['orderby']        = 'post__in';
 				$query_args['order']          = 'ASC';
 			}
@@ -559,7 +565,7 @@ class Mai_Testimonials {
 		$page = (int) $this->args['paged'] - 1;
 
 		if ( $page < 1 ) {
-			$page = (int) $query->max_num_pages;
+			$page = (int) $query->max_num_pages; // Don't use slider_max here.
 		}
 
 		return $page;
@@ -577,7 +583,7 @@ class Mai_Testimonials {
 	function get_next_page( $query ) {
 		$page = (int) $this->args['paged'] + 1;
 
-		if ( $page > (int) $query->max_num_pages ) {
+		if ( $page > (int) $query->max_num_pages ) { // Don't use slider_max here.
 			$page = 1;
 		}
 
