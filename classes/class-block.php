@@ -693,6 +693,11 @@ class Mai_Testimonials_Block {
 									'operator' => '==',
 									'value'    => '1',
 								],
+								[
+									'field'    => 'mai_testimonials_query_by',
+									'operator' => '!=',
+									'value'    => 'id',
+								],
 							],
 						],
 					],
