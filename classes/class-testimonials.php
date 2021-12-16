@@ -6,8 +6,6 @@ defined( 'ABSPATH' ) || die;
 class Mai_Testimonials {
 	public $args;
 	public $query_args;
-	public $prev;
-	public $next;
 	public $has_image;
 	public $has_name;
 	public $has_byline;
@@ -82,8 +80,6 @@ class Mai_Testimonials {
 
 		$this->args       = $args;
 		$this->query_args = $this->get_query_args();
-		$this->prev       = 1;
-		$this->next       = 1;
 		$show_keys        = array_flip( $this->args['show'] );
 		$this->has_image  = isset( $show_keys['image'] );
 		$this->has_name   = isset( $show_keys['name'] );
@@ -122,17 +118,24 @@ class Mai_Testimonials {
 		$query = new WP_Query( $this->query_args );
 
 		if ( $query->have_posts() ) {
-			$this->prev = $this->get_prev_page( $query );
-			$this->next = $this->get_next_page( $query );
-
 			// If slider.
 			if ( $this->has_slider && 1 === $this->args['paged'] ) {
+				// Slider max.
+				if ( 'id' === $this->args['query_by'] ) {
+					// If by choice, the max slides is the number chosen divided by the number displayed, rounded up.
+					$this->slider_max = absint( ceil( count( $this->args['include'] ) / $this->args['number'] ) );
+				} else {
+					// If slider_max has a value, use the lesser of that or max from the query. Otherwise use max from query.
+					$this->slider_max = $this->args['slider_max'] ? min( $this->args['slider_max'], (int) $query->max_num_pages ) : (int) $query->max_num_pages;
+				}
+
 				$attributes = [
-					'class'      => 'mait-slider',
-					'data-args'  => esc_html( json_encode( $this->args ), ENT_QUOTES, 'UTF-8' ),
-					'data-paged' => $this->args['paged'],
-					'data-prev'  => $this->prev,
-					'data-next'  => $this->next,
+					'class'        => 'mait-slider',
+					'data-args'    => esc_html( json_encode( $this->args ), ENT_QUOTES, 'UTF-8' ),
+					'data-current' => $this->args['paged'],
+					'data-prev'    => $this->get_prev_page( $query ),
+					'data-next'    => $this->get_next_page( $query ),
+					'data-max'     => $this->slider_max,
 				];
 
 				$html .= genesis_markup(
@@ -191,15 +194,6 @@ class Mai_Testimonials {
 			$html .= '</div>';
 
 			if ( $this->has_slider && 1 === $this->args['paged'] ) {
-				// Slider max.
-				if ( 'id' === $this->args['query_by'] ) {
-					// If by choice, the max slides is the number chosen divided by the number displayed, rounded up.
-					$this->slider_max = absint( ceil( count( $this->args['include'] ) / $this->args['number'] ) );
-				} else {
-					// If slider_max has a value, use the lesser of that or max from the query. Otherwise use max from query.
-					$this->slider_max = $this->args['slider_max'] ? min( $this->args['slider_max'], (int) $query->max_num_pages ) : (int) $query->max_num_pages;
-				}
-
 				// If more than one page.
 				if ( $this->slider_max > 1 ) {
 					if ( in_array( 'dots', $this->args['slider_show'] ) ) {
@@ -376,7 +370,7 @@ class Mai_Testimonials {
 
 		// Current page.
 		if ( $this->args['paged'] ) {
-			$attributes['data-paged'] = $this->args['paged'];
+			$attributes['data-slide'] = $this->args['paged'];
 		}
 
 		return genesis_markup(
@@ -475,7 +469,7 @@ class Mai_Testimonials {
 			$current  = (int) $paged === (int) $this->args['paged'];
 			$current  = $current ? ' mait-current' : '';
 			$disabled = $current ? ' data-disabled="true"' : '';
-			$html    .= sprintf( '<li><button class="mait-dot mait-button%s" data-paged="%s"%s>%s</button>', $current, $paged, $disabled, $text );
+			$html    .= sprintf( '<li><button class="mait-dot mait-button%s" data-slide="%s"%s>%s</button>', $current, $paged, $disabled, $text );
 		}
 
 		return genesis_markup(
@@ -532,7 +526,7 @@ class Mai_Testimonials {
 		$classes  = 'mait-button mait-previous';
 		$classes .= is_admin() ? ' button' : '';
 
-		return sprintf( '<button class="%s" data-paged="%s">%s</button>', $classes, $this->get_prev_page( $query ), wp_kses_post( $icon ) );
+		return sprintf( '<button class="%s" data-slide="%s">%s</button>', $classes, $this->get_prev_page( $query ), wp_kses_post( $icon ) );
 	}
 
 	/**
@@ -549,7 +543,7 @@ class Mai_Testimonials {
 		$classes  = 'mait-button mait-next';
 		$classes .= is_admin() ? ' button' : '';
 
-		return sprintf( '<button class="%s" data-paged="%s">%s</button>', $classes, $this->get_next_page( $query ), wp_kses_post( $icon ) );
+		return sprintf( '<button class="%s" data-slide="%s">%s</button>', $classes, $this->get_next_page( $query ), wp_kses_post( $icon ) );
 	}
 
 	/**
@@ -565,7 +559,7 @@ class Mai_Testimonials {
 		$page = (int) $this->args['paged'] - 1;
 
 		if ( $page < 1 ) {
-			$page = (int) $query->max_num_pages; // Don't use slider_max here.
+			$page = (int) $query->max_num_pages; // Can't use slider_max here?
 		}
 
 		return $page;
@@ -583,7 +577,7 @@ class Mai_Testimonials {
 	function get_next_page( $query ) {
 		$page = (int) $this->args['paged'] + 1;
 
-		if ( $page > (int) $query->max_num_pages ) { // Don't use slider_max here.
+		if ( $page > (int) $query->max_num_pages ) { // Can't use slider_max here?
 			$page = 1;
 		}
 

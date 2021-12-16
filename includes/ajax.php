@@ -30,12 +30,9 @@ function mait_ajax_get_testimonials() {
 	$args         = wp_unslash( $_POST['block_args'] );
 	$args         = json_decode( $args, true );
 	$testimonials = new Mai_Testimonials( $args );
-	$html         = $testimonials->get(); // Get first so prev/next properties are set.
 	$data         = [
-		'html'  => $html,
+		'html'  => $testimonials->get(),
 		'paged' => $args['paged'],
-		'prev'  => $testimonials->prev,
-		'next'  => $testimonials->next,
 	];
 
 	// Make your array as json.

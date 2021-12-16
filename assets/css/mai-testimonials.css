@@ -10,7 +10,6 @@
 
 .mait-slider .mait-testimonials {
 	grid-area: testimonials;
-	min-height: var(--testimonials-slider-min-height, 0);
 }
 
 .mait-inner {
