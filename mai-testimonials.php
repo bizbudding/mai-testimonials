@@ -141,6 +141,13 @@ final class Mai_Testimonials_Plugin {
 		foreach ( glob( MAI_TESTIMONIALS_CLASSES_DIR . '*.php' ) as $file ) { include $file; }
 	}
 
+	/**
+	 * Run hooks.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return void
+	 */
 	public function run() {
 		add_action( 'admin_init',        [ $this, 'updater' ] );
 		add_action( 'init',              [ $this, 'init' ] );
@@ -189,6 +196,13 @@ final class Mai_Testimonials_Plugin {
 		}
 	}
 
+	/**
+	 * Sets args.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return void
+	 */
 	public function init() {
 		$this->post_type_args = [
 			'exclude_from_search' => false,
@@ -224,18 +238,26 @@ final class Mai_Testimonials_Plugin {
 			'rewrite'            => false,
 			'supports'           => [ 'title', 'editor', 'thumbnail', 'page-attributes', 'genesis-cpt-archives-settings' ], // 'page-attributes' only here for sort order, especially with Simple Page Ordering plugin.
 		];
+
 		$this->post_type_args = apply_filters( 'mai_testimonial_args', $this->post_type_args );
 	}
 
+	/**
+	 * Sets up the plugin.
+	 * Checks for engine plugins.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return void
+	 */
 	public function setup() {
-		// Bail if CMB2 is not running anywhere.
+		// Bail if no engine is anywhere.
 		if ( ! ( class_exists( 'Mai_Theme_Engine' ) || class_exists( 'Mai_Engine' ) ) ) {
-			add_action( 'admin_init',    [ $this, 'deactivate_plugin' ] );
 			add_action( 'admin_notices', [ $this, 'admin_notice' ] );
 			return;
 		}
 
-		// Run
+		// Run.
 		$this->hooks();
 
 		// Bail if Genesis is not running.
@@ -254,13 +276,27 @@ final class Mai_Testimonials_Plugin {
 		}
 	}
 
+	/**
+	 * Displays admin notice.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return void
+	 */
 	function admin_notice() {
-		printf( '<div class="notice notice-warning is-dismissible"><p>%s</p></div>', __( 'Mai Testimonials requires Mai Theme and it\'s Engine plugin in order to run. As a result, this plugin has been deactivated.', 'mai-testimonials' ) );
+		printf( '<div class="notice notice-warning is-dismissible"><p>%s</p></div>', __( 'Mai Testimonials requires Mai Theme and it\'s Engine plugin in order to run.', 'mai-testimonials' ) );
 		if ( isset( $_GET['activate'] ) ) {
 			unset( $_GET['activate'] );
 		}
 	}
 
+	/**
+	 * Runs hooks.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return void
+	 */
 	public function hooks() {
 
 		register_activation_hook(   __FILE__, [ $this, 'activate' ] );
@@ -276,15 +312,25 @@ final class Mai_Testimonials_Plugin {
 		add_filter( 'mai_display_taxonomy_post_type_choices', [ $this, 'display_taxonomy_post_types' ] );
 	}
 
+	/**
+	 * Flushes permalinks upon activation.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return void
+	 */
 	public function activate() {
 		$this->register_content_types();
 		flush_rewrite_rules();
 	}
 
-	function deactivate_plugin() {
-		deactivate_plugins( plugin_basename( __FILE__ ) );
-	}
-
+	/**
+	 * Registers post types and taxonomies.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return void
+	 */
 	public function register_content_types() {
 
 		/***********************
