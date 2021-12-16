@@ -59,28 +59,36 @@
 				nextPage = data.data.next;
 				paged    = data.data.paged;
 
+				var slide    = false;
 				var existing = slider.querySelector( '.mait-testimonials[data-paged="' + paged + '"]' );
 
 				if ( existing ) {
 					// Toggle visiblity classes.
-					existing.classList.remove( 'mait-hidden' );
+					slide = existing;
+					slide.classList.remove( 'mait-hidden' );
+					slide.setAttribute( 'aria-hidden', 'false' );
 				} else {
 					// Build new slide.
 					var div       = document.createElement( 'div' );
 					div.innerHTML = data.data.html.trim();
-					var slide     = div.firstChild;
+					slide         = div.firstChild;
+					slide.setAttribute( 'aria-hidden', 'false' );
 
 					// Append to the HTML.
 					var last = slider.querySelector( '.mait-testimonials:last-of-type' );
 					last.after( slide );
 				}
 
-				// Hide hidden class.
+				// Add hidden class.
 				slider.querySelectorAll( '.mait-testimonials:not([data-paged="' + paged + '"])' ).forEach( function( toHide ) {
 					toHide.classList.add( 'mait-hidden' );
+					toHide.setAttribute( 'aria-hidden', 'true' );
 				});
 
+				console.log( slide.offsetHeight );
+
 				// Set slider attributes.
+				slider.style.setProperty( '--testimonials-slider-min-height', slide.offsetHeight + 'px' );
 				slider.setAttribute( 'data-prev', prevPage );
 				slider.setAttribute( 'data-next', nextPage );
 				slider.setAttribute( 'data-paged', paged );
@@ -142,8 +150,6 @@
 				focusedSlider = document.activeElement.closest( '.mait-slider' );
 			}
 		}
-
-		console.log( document.activeElement );
 
 		if ( ! focusedSlider ) {
 			return;
