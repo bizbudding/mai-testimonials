@@ -98,7 +98,8 @@
 
 .mait-name {
 	display: block;
-	font-size: var(--font-size-lg);
+	font-weight: var(--heading-font-weight);
+	font-size: var(--font-size-md);
 	font-family: var(--heading-font-family);
 }
 
