@@ -1,9 +1,9 @@
-.mai-testimonials .mai-testimonial-content p {
+.mait-testimonials .mait-content p {
 	/* overriding Mai Theme default editor styles on p. */
 	font-size: var(--testimonial-font-size, var(--font-size-md));
 }
 
-.mai-testimonials a,
+.mait-testimonials a,
 .mait-button {
-	cursor: not-allowed !important;
+	pointer-events: none !important;
 }
