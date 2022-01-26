@@ -12,7 +12,7 @@ class Mai_Testimonials_Grid_Block {
 	/**
 	 * Runs hooks.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @return void
 	 */

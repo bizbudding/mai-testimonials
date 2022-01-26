@@ -12,7 +12,7 @@ class Mai_Testimonials_Block {
 	/**
 	 * Runs hooks.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @return void
 	 */
@@ -27,7 +27,7 @@ class Mai_Testimonials_Block {
 	/**
 	 * Register Mai Testimonials block.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @return void
 	 */
@@ -81,7 +81,7 @@ class Mai_Testimonials_Block {
 	/**
 	 * Callback function to render the testimonials block.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @param array  $block      The block settings and attributes.
 	 * @param string $content    The block inner HTML (empty).
@@ -128,7 +128,7 @@ class Mai_Testimonials_Block {
 	/**
 	 * Registers field group.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @return array
 	 */
@@ -718,7 +718,7 @@ class Mai_Testimonials_Block {
 	/**
 	 * Loads taxonomy choices.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @return array
 	 */
@@ -732,7 +732,7 @@ class Mai_Testimonials_Block {
 	 * Get terms from an ajax query.
 	 * The taxonomy is passed via JS on select2_query_args filter.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @param array $field The ACF field array.
 	 *
@@ -750,7 +750,7 @@ class Mai_Testimonials_Block {
 	 * Get terms from an ajax query.
 	 * The taxonomy is passed via JS on select2_query_args filter.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @param array $field The ACF field array.
 	 *
@@ -767,7 +767,7 @@ class Mai_Testimonials_Block {
 	/**
 	 * Adds custom CSS in the first field.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @return void
 	 */

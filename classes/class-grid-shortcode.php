@@ -12,7 +12,7 @@ class Mai_Testimonials_Grid_Shortcode {
 	/**
 	 * Runs hooks.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @return void
 	 */

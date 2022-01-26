@@ -31,7 +31,7 @@
 	 * Changes slide with arrow keys.
 	 * Only works if slider has focus.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @return void
 	 */
@@ -183,7 +183,7 @@
 	/**
 	 * Hide slide.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @return void
 	 */
@@ -195,7 +195,7 @@
 	/**
 	 * Show slide.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @return void
 	 */
@@ -207,7 +207,7 @@
 	/**
 	 * Adds click event to change slide.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @return void
 	 */
@@ -218,7 +218,7 @@
 	/**
 	 * Adds keydown event to change slide with arrow keys.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @return void
 	 */

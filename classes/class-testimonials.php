@@ -90,7 +90,7 @@ class Mai_Testimonials {
 	/**
 	 * Displays testimonials.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @return void
 	 */
@@ -101,7 +101,7 @@ class Mai_Testimonials {
 	/**
 	 * Gets testimonials.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @return string
 	 */
@@ -226,7 +226,7 @@ class Mai_Testimonials {
 	/**
 	 * Gets query args for WP_Query.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @return array
 	 */
@@ -311,7 +311,7 @@ class Mai_Testimonials {
 	/**
 	 * Gets openin markup.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @return string
 	 */
@@ -389,7 +389,7 @@ class Mai_Testimonials {
 	/**
 	 * Gets inner markup opening.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @return string
 	 */
@@ -410,7 +410,7 @@ class Mai_Testimonials {
 	/**
 	 * Gets details.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @param string $image  Image value.
 	 * @param string $name   Name value.
@@ -454,7 +454,7 @@ class Mai_Testimonials {
 	/**
 	 * Gets pagination dots.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @param WP_Query $query Query object.
 	 *
@@ -491,7 +491,7 @@ class Mai_Testimonials {
 	/**
 	 * Gets prev/next slide arrows.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @param WP_Query $query Query object.
 	 *
@@ -515,7 +515,7 @@ class Mai_Testimonials {
 	/**
 	 * Gets previous arrow.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @param WP_Query $query Query object.
 	 *
@@ -532,7 +532,7 @@ class Mai_Testimonials {
 	/**
 	 * Gets next arrow.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @param WP_Query $query Query object.
 	 *
@@ -549,7 +549,7 @@ class Mai_Testimonials {
 	/**
 	 * Gets previous page number.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @param WP_Query $query Query object.
 	 *
@@ -568,7 +568,7 @@ class Mai_Testimonials {
 	/**
 	 * Gets next page number.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @param WP_Query $query Query object.
 	 *
@@ -587,7 +587,7 @@ class Mai_Testimonials {
 	/**
 	 * Sanitizes taxonomies.
 	 *
-	 * @since TBD
+	 * @since 2.3.0
 	 *
 	 * @param array
 	 *

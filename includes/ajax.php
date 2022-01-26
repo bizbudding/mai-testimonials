@@ -10,7 +10,7 @@ add_action( 'wp_ajax_nopriv_mait_ajax_get_testimonials', 'mait_ajax_get_testimon
  *
  * @access private
  *
- * @since TBD
+ * @since 2.3.0
  *
  * @return void
  */
