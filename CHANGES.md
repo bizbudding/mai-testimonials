@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.3.0 (1/26/22)
+* Added: New Mai Testimonials block!
+
 ## 2.2.0 (5/11/21)
 * Changed: Post type args now explicitely force no archive or single view. If you need either view you need to use `mai_testimonial_args` filter to change everything how you want it.
 
