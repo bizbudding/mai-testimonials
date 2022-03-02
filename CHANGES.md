@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.3.1 (3/2/22)
+* Fixed: Allow slider dots to wrap if showing more than the container can fit.
+
 ## 2.3.0 (1/26/22)
 * Added: New Mai Testimonials block!
 
