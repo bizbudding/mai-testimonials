@@ -119,6 +119,7 @@
 	--list-padding: 0;
 	--list-item-margin: 0;
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
 	justify-content: center;
 }
