@@ -15,6 +15,7 @@ class Mai_Testimonials {
 	function __construct( $args ) {
 		$args = wp_parse_args( $args,
 			[
+				'preview'                => false,
 				'paged'                  => 1,
 				'font_size'              => '',
 				'text_align'             => '',
@@ -38,6 +39,8 @@ class Mai_Testimonials {
 				'align_columns_vertical' => '',
 				'column_gap'             => 'md',
 				'row_gap'                => 'md',
+				'margin_top'             => '',
+				'margin_bottom'          => '',
 				'boxed'                  => '',
 				'slider'                 => false,
 				'slider_show'            => [ 'arrows', 'dots' ],
@@ -48,6 +51,7 @@ class Mai_Testimonials {
 
 		// Sanitize.
 		$args = [
+			'preview'                => mai_sanitize_bool( $args['preview'] ),
 			'paged'                  => absint( $args['paged'] ),
 			'font_size'              => esc_html( $args['font_size'] ),
 			'text_align'             => esc_html( $args['text_align'] ),
@@ -71,6 +75,8 @@ class Mai_Testimonials {
 			'align_columns_vertical' => esc_html( $args['align_columns_vertical'] ),
 			'column_gap'             => esc_html( $args['column_gap'] ),
 			'row_gap'                => esc_html( $args['row_gap'] ),
+			'margin_top'             => esc_html( $args['margin_top'] ),
+			'margin_bottom'          => esc_html( $args['margin_bottom'] ),
 			'boxed'                  => mai_sanitize_bool( $args['boxed'] ),
 			'slider'                 => mai_sanitize_bool( $args['slider'] ),
 			'slider_show'            => array_map( 'esc_html', (array) $args['slider_show'] ),
@@ -129,7 +135,7 @@ class Mai_Testimonials {
 					$this->slider_max = $this->args['slider_max'] ? min( $this->args['slider_max'], (int) $query->max_num_pages ) : (int) $query->max_num_pages;
 				}
 
-				$attributes = [
+				$atts = [
 					'class'        => 'mait-slider',
 					'data-args'    => esc_html( json_encode( $this->args ), ENT_QUOTES, 'UTF-8' ),
 					'data-current' => $this->args['paged'],
@@ -138,12 +144,21 @@ class Mai_Testimonials {
 					'data-max'     => $this->slider_max,
 				];
 
+				// Margin. If not a slider this is on the testimonials container.
+				if ( $this->args['margin_top'] ) {
+					$atts['class'] = mai_add_classes( sprintf( 'has-%s-margin-top', $this->args['margin_top'] ), $atts['class'] );
+				}
+
+				if ( $this->args['margin_bottom'] ) {
+					$atts['class'] = mai_add_classes( sprintf( 'has-%s-margin-bottom', $this->args['margin_bottom'] ), $atts['class'] );
+				}
+
 				$html .= genesis_markup(
 					[
 						'open'    => '<div %s>',
 						'context' => 'testimonials-slider',
 						'echo'    => false,
-						'atts'    => $attributes,
+						'atts'    => $atts,
 						'params'  => [
 							'args' => $this->args,
 						],
@@ -316,61 +331,49 @@ class Mai_Testimonials {
 	 * @return string
 	 */
 	function get_open() {
-		$attributes = [
+		$atts = [
 			'class' => mai_add_classes( 'mait-testimonials', $this->args['class'] ),
-			'style' => '',
 		];
+
+		$atts = mai_get_columns_atts( $atts, $this->args );
 
 		// Boxed.
 		if ( $this->args['boxed'] ) {
-			$attributes['class'] .= ' has-boxed';
+			$atts['class'] .= ' has-boxed';
+		}
+
+		// Margin. If slider this is on the slider container.
+		if ( ! ( $this->has_slider && 1 === $this->args['paged'] ) ) {
+			if ( $this->args['margin_top'] ) {
+				$atts['class'] = mai_add_classes( sprintf( 'has-%s-margin-top', $this->args['margin_top'] ), $atts['class'] );
+			}
+
+			if ( $this->args['margin_bottom'] ) {
+				$atts['class'] = mai_add_classes( sprintf( 'has-%s-margin-bottom', $this->args['margin_bottom'] ), $atts['class'] );
+			}
 		}
 
 		// Font size.
 		if ( $this->args['font_size'] ) {
-			$attributes['style'] .= sprintf( '--testimonial-font-size:var(--font-size-%s);', $this->args['font_size'] );
+			$atts['style'] .= sprintf( '--testimonial-font-size:var(--font-size-%s);', $this->args['font_size'] );
 		}
 
 		// Text align.
 		if ( $this->args['text_align'] ) {
-			$attributes['style'] .= sprintf( '--testimonial-text-align:%s;', $this->args['text_align'] );
-		}
-
-		// Get the columns breakpoint array.
-		$columns = mai_get_breakpoint_columns( $this->args );
-
-		$attributes['style'] .= sprintf( '--columns-lg:%s;', $columns['lg'] );
-		$attributes['style'] .= sprintf( '--columns-md:%s;', $columns['md'] );
-		$attributes['style'] .= sprintf( '--columns-sm:%s;', $columns['sm'] );
-		$attributes['style'] .= sprintf( '--columns-xs:%s;', $columns['xs'] );
-
-		// Column/Row gap.
-		$column_gap = $this->args['column_gap'] ? sprintf( 'var(--spacing-%s)', $this->args['column_gap'] ) : '0px'; // Needs 0px for calc().
-		$row_gap    = $this->args['row_gap'] ? sprintf( 'var(--spacing-%s)', $this->args['row_gap'] ) : '0px'; // Needs 0px for calc().
-
-		$attributes['style'] .= sprintf( '--column-gap:%s;', $column_gap  );
-		$attributes['style'] .= sprintf( '--row-gap:%s;', $row_gap );
-
-		// Align columns.
-		if ( $this->args['align_columns'] ) {
-			$attributes['style'] .= sprintf( '--align-columns:%s;', mai_get_flex_align( $this->args['align_columns'] ) );
-		}
-
-		if ( $this->args['align_columns_vertical'] ) {
-			$attributes['style'] .= sprintf( '--align-columns-vertical:%s;', mai_get_flex_align( $this->args['align_columns_vertical'] ) );
+			$atts['style'] .= sprintf( '--testimonial-text-align:%s;', $this->args['text_align'] );
 		}
 
 		if ( 'before' === $this->args['author_location'] ) {
-			$attributes['style'] .= '--testimonial-details-margin:0 0 var(--spacing-md);';
+			$atts['style'] .= '--testimonial-details-margin:0 0 var(--spacing-md);';
 		}
 
 		if ( 'inside' === $this->args['image_location'] && ( $this->has_name || $this->has_byline ) ) {
-			$attributes['style'] .= '--testimonial-image-margin:0 var(--spacing-md) 0 0;--testimonial-details-text-align:left;';
+			$atts['style'] .= '--testimonial-image-margin:0 var(--spacing-md) 0 0;--testimonial-details-text-align:left;';
 		}
 
 		// Current page.
 		if ( $this->args['paged'] ) {
-			$attributes['data-slide'] = $this->args['paged'];
+			$atts['data-slide'] = $this->args['paged'];
 		}
 
 		return genesis_markup(
@@ -378,7 +381,7 @@ class Mai_Testimonials {
 				'open'    => '<div %s>',
 				'context' => 'testimonials',
 				'echo'    => false,
-				'atts'    => $attributes,
+				'atts'    => $atts,
 				'params'  => [
 					'args' => $this->args,
 				],
