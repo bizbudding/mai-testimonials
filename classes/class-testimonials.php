@@ -19,6 +19,7 @@ class Mai_Testimonials {
 				'paged'                  => 1,
 				'font_size'              => '',
 				'text_align'             => '',
+				'details_align'          => '',
 				'image_location'         => '',
 				'author_location'        => '',
 				'show'                   => [ 'name', 'image', 'byline' ],
@@ -55,6 +56,7 @@ class Mai_Testimonials {
 			'paged'                  => absint( $args['paged'] ),
 			'font_size'              => esc_html( $args['font_size'] ),
 			'text_align'             => esc_html( $args['text_align'] ),
+			'details_align'          => esc_html( $args['details_align'] ),
 			'image_location'         => esc_html( $args['image_location'] ),
 			'author_location'        => esc_html( $args['author_location'] ),
 			'show'                   => array_map( 'esc_html', (array) $args['show'] ),
@@ -84,13 +86,14 @@ class Mai_Testimonials {
 			'class'                  => esc_html( $args['class'] ),
 		];
 
-		$this->args       = $args;
-		$this->query_args = $this->get_query_args();
-		$show_keys        = array_flip( $this->args['show'] );
-		$this->has_image  = isset( $show_keys['image'] );
-		$this->has_name   = isset( $show_keys['name'] );
-		$this->has_byline = isset( $show_keys['byline'] );
-		$this->has_slider = $this->args['slider'] && count( $this->args['slider_show'] ) >= 1;
+		$this->args        = $args;
+		$this->query_args  = $this->get_query_args();
+		$show_keys         = array_flip( $this->args['show'] );
+		$this->has_image   = isset( $show_keys['image'] );
+		$this->has_name    = isset( $show_keys['name'] );
+		$this->has_byline  = isset( $show_keys['byline'] );
+		$this->has_url     = isset( $show_keys['url'] );
+		$this->has_slider  = $this->args['slider'] && count( $this->args['slider_show'] ) >= 1;
 	}
 
 	/**
@@ -178,7 +181,15 @@ class Mai_Testimonials {
 						$name     = $name ? sprintf( '<span class="mait-name">%s</span>', $name ) : '';
 						$byline   = $this->has_byline ? get_post_meta( get_the_ID(), 'byline', true ) : '';
 						$byline   = $byline ? sprintf( '<span class="mait-byline">%s</span>', $byline ) : '';
-						$details  = $this->get_details( $image, $name, $byline );
+						$url      = $this->has_url ? get_post_meta( get_the_ID(), 'url', true ) : '';
+
+						if ( $url ) {
+							$parsed = wp_parse_url( $url );
+							$url    = sprintf( '<span class="mait-url"><a target="_blank" rel="nofollow noopener" href="%s">%s</a></span>', esc_url( $url ), $parsed['host'] );
+						}
+
+						// Build details.
+						$details  = $this->get_details( $image, $name, $byline, $url );
 
 						$html .= '<div class="mait-testimonial">';
 
@@ -335,7 +346,9 @@ class Mai_Testimonials {
 			'class' => mai_add_classes( 'mait-testimonials', $this->args['class'] ),
 		];
 
-		$atts = mai_get_columns_atts( $atts, $this->args );
+		$atts             = mai_get_columns_atts( $atts, $this->args );
+		$has_image_inside = $this->has_image && 'inside' === $this->args['image_location'];
+		$has_details      = $has_image_inside || $this->has_name || $this->has_byline || $this->has_url;
 
 		// Boxed.
 		if ( $this->args['boxed'] ) {
@@ -363,13 +376,50 @@ class Mai_Testimonials {
 			$atts['style'] .= sprintf( '--testimonial-text-align:%s;', $this->args['text_align'] );
 		}
 
-		if ( 'before' === $this->args['author_location'] ) {
-			$atts['style'] .= '--testimonial-details-margin:0 0 var(--spacing-md);';
+		// Details.
+		if ( $has_details ) {
+			if ( 'before' === $this->args['author_location'] ) {
+				$atts['style'] .= '--testimonial-details-margin:0 0 var(--spacing-md);';
+			}
+
+			// Details align.
+			if ( $this->args['details_align'] ) {
+				$atts['style'] .= sprintf( '--testimonial-details-justify-content:%s;', $this->args['details_align'] );
+
+				// No image, text can align.
+				if ( ! $has_image_inside ) {
+					$atts['style'] .= sprintf( '--testimonial-details-text-align:%s;', $this->args['details_align'] );
+				}
+				/**
+				 * Has image.
+				 * Start or center align with an image should both align text to start.
+				 * End is the only setting with text aligned end.
+				 */
+				else {
+					if ( 'end' === $this->args['details_align'] ) {
+						$atts['style'] .= '--testimonial-details-text-align:end;';
+					} else {
+						$atts['style'] .= '--testimonial-details-text-align:start;';
+					}
+				}
+			}
 		}
 
-		if ( 'inside' === $this->args['image_location'] && ( $this->has_name || $this->has_byline ) ) {
-			$atts['style'] .= '--testimonial-image-margin:0 var(--spacing-md) 0 0;--testimonial-details-text-align:left;';
+		if ( $has_image_inside ) {
+			$atts['style'] .= '--testimonial-image-margin:0;';
 		}
+
+		// if ( ! $this->args['details_align'] || ( $this->args['details_align'] && 'inside' === $this->args['image_location'] && ( $this->has_name || $this->has_byline || $this->has_url ) ) ) {
+		// 	if ( ! $this->args['details_align'] ) {
+		// 		$atts['style'] .= '--testimonial-image-margin:0 var(--spacing-md) 0 0;--testimonial-details-text-align:start;';
+		// 	} else {
+		// 		if ( in_array( $this->args['details_align'], [ 'start, center' ] ) ) {
+		// 			$atts['style'] .= '--testimonial-image-margin:0 var(--spacing-md) 0 0;--testimonial-details-text-align:start;';
+		// 		} else {
+		// 			$atts['style'] .= '--testimonial-image-margin:0 0 0 var(--spacing-md);--testimonial-details-text-align:end;';
+		// 		}
+		// 	}
+		// }
 
 		// Current page.
 		if ( $this->args['paged'] ) {
@@ -418,21 +468,27 @@ class Mai_Testimonials {
 	 * @param string $image  Image value.
 	 * @param string $name   Name value.
 	 * @param string $byline Byline value.
+	 * @param string $url    Url value.
 	 *
 	 * @return string
 	 */
-	function get_details( $image = '', $name = '', $byline = '' ) {
+	function get_details( $image = '', $name = '', $byline = '', $url = '' ) {
 		$html = '';
 
-		if ( 'inside' === $this->args['image_location'] ) {
+		if ( $this->has_image && 'inside' === $this->args['image_location'] && 'end' !== $this->args['details_align'] ) {
 			$html .= $image ?: '';
 		}
 
-		if ( $name || $byline ) {
+		if ( $name || $byline || $url ) {
 			$html .= '<div class="mait-author">';
 				$html .= $name ?: '';
 				$html .= $byline ?: '';
+				$html .= $url ?: '';
 			$html .= '</div>';
+		}
+
+		if ( $this->has_image && 'inside' === $this->args['image_location'] && 'end' === $this->args['details_align'] ) {
+			$html .= $image ?: '';
 		}
 
 		if ( ! $html ) {

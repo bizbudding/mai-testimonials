@@ -75,8 +75,9 @@
 
 .mait-details {
 	display: flex;
+	gap: var(--spacing-md);
 	align-items: center;
-	justify-content: center;
+	justify-content: var(--testimonial-details-justify-content, center);
 	margin: var(--testimonial-details-margin, 0);
 	text-align: var(--testimonial-details-text-align, center);
 }
@@ -96,6 +97,10 @@
 	max-width: 66.666666%;
 }
 
+.mait-author > *:not(:last-child) {
+	margin-bottom: var(--spacing-xxxs);
+}
+
 .mait-name {
 	display: block;
 	font-weight: var(--heading-font-weight);
@@ -103,11 +108,9 @@
 	font-family: var(--heading-font-family);
 }
 
-.mait-name:not(:last-child) {
-	margin-bottom: var(--spacing-xxxs);
-}
-
-.mait-byline {
+.mait-byline,
+.mait-url {
+	--link-color: currentColor;
 	display: block;
 	font-size: var(--font-size-sm);
 	line-height: 1.25;

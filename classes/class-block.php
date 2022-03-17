@@ -17,10 +17,10 @@ class Mai_Testimonials_Block {
 	 * @return void
 	 */
 	function hooks() {
-		add_action( 'acf/init', [ $this, 'register_block' ] );
-		add_action( 'acf/load_field/key=mai_testimonials_taxonomy', [ $this, 'load_taxonomies' ] );
-		add_filter( 'acf/load_field/key=mai_testimonials_terms', [ $this, 'load_terms' ] );
-		add_filter( 'acf/prepare_field/key=mai_testimonials_terms', [ $this, 'prepare_terms' ] );
+		add_action( 'acf/init',                                          [ $this, 'register_block' ] );
+		add_action( 'acf/load_field/key=mai_testimonials_taxonomy',      [ $this, 'load_taxonomies' ] );
+		add_filter( 'acf/load_field/key=mai_testimonials_terms',         [ $this, 'load_terms' ] );
+		add_filter( 'acf/prepare_field/key=mai_testimonials_terms',      [ $this, 'prepare_terms' ] );
 		add_action( 'acf/render_field/key=mai_testimonials_display_tab', [ $this, 'admin_css' ] );
 	}
 
@@ -74,9 +74,10 @@ class Mai_Testimonials_Block {
 		$args = [
 			'font_size'              => get_field( 'font_size' ),
 			'text_align'             => get_field( 'text_align' ),
+			'show'                   => get_field( 'show' ),
 			'image_location'         => get_field( 'image_location' ),
 			'author_location'        => get_field( 'author_location' ),
-			'show'                   => get_field( 'show' ),
+			'details_align'          => get_field( 'details_align' ),
 			'query_by'               => get_field( 'query_by' ),
 			'number'                 => get_field( 'number' ),
 			'include'                => get_field( 'include' ),
@@ -144,11 +145,11 @@ class Mai_Testimonials_Block {
 					],
 					[
 						'key'           => 'mai_testimonials_text_align',
-						'label'         => __( 'Text Align', 'mai-testimonials' ),
+						'label'         => __( 'Text Alignment', 'mai-testimonials' ),
 						'name'          => 'text_align',
 						'type'          => 'button_group',
 						'wrapper'       => [
-							'class'        => 'mai-acf-button-group',
+							'class'        => 'mai-acf-button-group mai-acf-button-group-small',
 						],
 						'choices'       => [
 							'start'        => __( 'Start', 'mai-testimonials' ),
@@ -162,7 +163,7 @@ class Mai_Testimonials_Block {
 					],
 					[
 						'key'           => 'mai_testimonials_show',
-						'label'         => 'Show',
+						'label'         => __( 'Show Details', 'mai-testimonials' ),
 						'name'          => 'show',
 						'type'          => 'checkbox',
 						'default_value' => [
@@ -171,9 +172,10 @@ class Mai_Testimonials_Block {
 							'byline',
 						],
 						'choices'       => [
-							'image'  => __( 'Image', 'mai-testimonials' ),
-							'name'   => __( 'Name', 'mai-testimonials' ),
-							'byline' => __( 'Byline', 'mai-testimonials' ),
+							'image'   => __( 'Image', 'mai-testimonials' ),
+							'name'    => __( 'Name', 'mai-testimonials' ),
+							'byline'  => __( 'Byline', 'mai-testimonials' ),
+							'url'     => __( 'Website', 'mai-testimonials' ),
 						],
 					],
 					[
@@ -185,7 +187,7 @@ class Mai_Testimonials_Block {
 						'choices'           => [
 							'before' => __( 'Above content', 'mai-testimonials' ),
 							'after'  => __( 'Below content', 'mai-testimonials' ),
-							'inside' => __( 'Next to name/byline', 'mai-testimonials' ),
+							'inside' => __( 'Next to details', 'mai-testimonials' ),
 						],
 						'conditional_logic' => [
 							[
@@ -198,14 +200,75 @@ class Mai_Testimonials_Block {
 						],
 					],
 					[
-						'key'           => 'mai_testimonials_author_location',
-						'label'         => __( 'Name/byline location', 'mai-testimonials' ),
-						'name'          => 'author_location',
-						'type'          => 'select',
-						'default_value' => 'after',
-						'choices'       => [
+						'key'               => 'mai_testimonials_author_location',
+						'label'             => __( 'Details location', 'mai-testimonials' ),
+						'name'              => 'author_location',
+						'type'              => 'select',
+						'default_value'     => 'after',
+						'choices'           => [
 							'before' => __( 'Above content', 'mai-testimonials' ),
 							'after'  => __( 'Below content', 'mai-testimonials' ),
+						],
+						'conditional_logic' => [
+							[
+								[
+									'field'    => 'mai_testimonials_show',
+									'operator' => '==',
+									'value'    => 'image',
+								],
+								[
+									'field'    => 'mai_testimonials_image_location',
+									'operator' => '==',
+									'value'    => 'inside',
+								],
+							],
+							[
+								[
+									'field'    => 'mai_testimonials_show',
+									'operator' => '==',
+									'value'    => 'name',
+								],
+							],
+							[
+								[
+									'field'    => 'mai_testimonials_show',
+									'operator' => '==',
+									'value'    => 'byline',
+								],
+							],
+							[
+								[
+									'field'    => 'mai_testimonials_show',
+									'operator' => '==',
+									'value'    => 'url',
+								],
+							],
+						],
+					],
+					[
+						'key'           => 'mai_testimonials_details_align',
+						'label'         => __( 'Details Alignment', 'mai-testimonials' ),
+						'name'          => 'details_align',
+						'type'          => 'button_group',
+						'wrapper'       => [
+							'class'        => 'mai-acf-button-group mai-acf-button-group-small',
+						],
+						'choices'       => [
+							'start'        => __( 'Start', 'mai-testimonials' ),
+							'center'       => __( 'Center', 'mai-testimonials' ),
+							'end'          => __( 'End', 'mai-testimonials' ),
+						],
+						'allow_null'        => 0,
+						'default_value'     => 'center',
+						'layout'            => 'horizontal',
+						'return_format'     => 'value',
+						'conditional_logic' => [
+							[
+								[
+									'field'    => 'mai_testimonials_show',
+									'operator' => '!=empty',
+								],
+							],
 						],
 					],
 					[
