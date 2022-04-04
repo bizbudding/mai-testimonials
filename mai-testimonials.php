@@ -419,7 +419,7 @@ final class Mai_Testimonials_Plugin {
 	 * @return void
 	 */
 	function admin_notice_version() {
-		printf( '<div class="notice notice-warning"><p>%s%s%s</p></div>', __( 'Mai Testimonials requires Mai Engine plugin version 2.21.0 or later. Please install/upgrade now to use the Mai Testimonials.', 'mai-testimonials' ) );
+		printf( '<div class="notice notice-warning"><p>%s</p></div>', __( 'Mai Testimonials requires Mai Engine plugin version 2.21.0 or later. Please install/upgrade now to use the Mai Testimonials.', 'mai-testimonials' ) );
 	}
 }
 
