@@ -191,7 +191,20 @@ class Mai_Testimonials {
 						// Build details.
 						$details  = $this->get_details( $image, $name, $byline, $url );
 
-						$html .= '<div class="mait-testimonial">';
+						$html .= genesis_markup(
+							[
+								'open'    => '<div %s>',
+								'close'   => '',
+								'context' => 'testimonial',
+								'echo'    => false,
+								'atts'    => [
+									'class' => 'mait-testimonial',
+								],
+								'params'  => [
+									'args' => $this->args,
+								],
+							]
+						);
 
 							if ( 'before' === $this->args['image_location'] ) {
 								$html .= $image ?: '';
@@ -201,7 +214,21 @@ class Mai_Testimonials {
 								$html .= $details ?: '';
 							}
 
-							$html .= sprintf( '<div class="mait-content">%s</div>', mai_get_processed_content( $content ) );
+							$html .= genesis_markup(
+								[
+									'open'    => '<div %s>',
+									'close'   => '</div>',
+									'context' => 'testimonial-content',
+									'content' => mai_get_processed_content( $content ),
+									'echo'    => false,
+									'atts'    => [
+										'class' => 'mait-content',
+									],
+									'params'  => [
+										'args' => $this->args,
+									],
+								]
+							);
 
 							if ( 'after' === $this->args['image_location'] ) {
 								$html .= $image ?: '';
@@ -211,7 +238,17 @@ class Mai_Testimonials {
 								$html .= $details ?: '';
 							}
 
-						$html .= '</div>';
+						$html .= genesis_markup(
+							[
+								'open'    => '',
+								'close'   => '</div>',
+								'context' => 'testimonial',
+								'echo'    => false,
+								'params'  => [
+									'args' => $this->args,
+								],
+							]
+						);
 
 					endwhile;
 
