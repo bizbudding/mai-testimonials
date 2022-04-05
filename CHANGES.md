@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.4.0 (4/5/22)
+* Changed: Post type is now public so it works out of the box with SearchWP and FacetWP and similar plugins. Singular views are still not enabled because publicly_queryable is still false.
+
 ## 2.3.1 (3/2/22)
 * Fixed: Allow slider dots to wrap if showing more than the container can fit.
 
