@@ -271,7 +271,7 @@ final class Mai_Testimonials_Plugin {
 		register_post_type( 'testimonial',
 			apply_filters( 'mai_testimonial_args',
 				[
-					'exclude_from_search' => false,
+					'exclude_from_search' => false, // False here so it can show up in SearchWP/FacetWP options.
 					'has_archive'         => false,
 					'hierarchical'        => false,
 					'labels'              => [
@@ -295,8 +295,8 @@ final class Mai_Testimonials_Plugin {
 						'use_featured_image'    => __( 'Use testimonial image'                           , 'mai-testimonials' ),
 					],
 					'menu_icon'          => 'dashicons-format-quote',
-					'public'             => false,
-					'publicly_queryable' => false,
+					'public'             => true,  // Needs to be true for SearchWP/FacetWP.
+					'publicly_queryable' => false, // Hides from the front end. No singular view.
 					'show_in_menu'       => true,
 					'show_in_nav_menus'  => false,
 					'show_in_rest'       => true,

@@ -28,7 +28,7 @@ class Mai_Testimonials_Content_Types {
 	/**
 	 * Remove testimonials from search results.
 	 * We leave 'exclude_from_search' as false when registering the post type
-	 * so it can work with FacetWP.
+	 * so it can work with SearchWP/FacetWP.
 	 *
 	 * @since 0.1.0
 	 *
@@ -38,11 +38,9 @@ class Mai_Testimonials_Content_Types {
 		if ( is_admin() || ! $query->is_search ) {
 			return;
 		}
-		// Bail if post_type is public.
-		if ( $this->post_type_args['public'] ) {
-			return;
-		}
+
 		global $wp_post_types;
+
 		if ( isset( $wp_post_types['testimonial'] ) ) {
 			$wp_post_types['testimonial']->exclude_from_search = true;
 		}
