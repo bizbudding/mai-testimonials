@@ -30,9 +30,9 @@ function mai_enqueue_testimonials_styles( $preview = false ) {
 		// Slider.
 		wp_enqueue_script( 'mai-testimonials', MAI_TESTIMONIALS_PLUGIN_URL . "assets/js/mai-testimonials{$suffix}.js", [], MAI_TESTIMONIALS_VERSION, true );
 		wp_localize_script( 'mai-testimonials', 'maiTestimonialsVars',
-		[
-			'ajaxurl' => admin_url( 'admin-ajax.php' ),
-			'nonce'   => wp_create_nonce( 'mai_testimonials_slider' ),
+			[
+				'ajaxurl' => admin_url( 'admin-ajax.php' ),
+				'nonce'   => wp_create_nonce( 'mai_testimonials_slider' ),
 			]
 		);
 	}
