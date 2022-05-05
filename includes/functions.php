@@ -18,17 +18,17 @@ function mai_enqueue_testimonials_styles( $preview = false ) {
 	$suffix = mai_testimonials_get_suffix();
 
 	// Block.
-	wp_enqueue_style( 'mai-testimonials', MAI_TESTIMONIALS_PLUGIN_URL . "assets/css/mai-testimonials{$suffix}.css" );
+	wp_enqueue_style( 'mai-testimonials', MAI_TESTIMONIALS_PLUGIN_URL . "assets/css/mai-testimonials{$suffix}.css", [], MAI_TESTIMONIALS_VERSION . '.' . date( 'njYHi', filemtime( MAI_TESTIMONIALS_PLUGIN_DIR . "assets/css/mai-testimonials{$suffix}.css" ) ) );
 
 	// Editor.
 	if ( $preview ) {
-		wp_enqueue_style( 'mai-testimonials-editor', MAI_TESTIMONIALS_PLUGIN_URL . "assets/css/mai-testimonials-editor{$suffix}.css" );
-		wp_enqueue_script( 'mai-testimonials-editor', MAI_TESTIMONIALS_PLUGIN_URL . "assets/js/mai-testimonials-editor{$suffix}.js", [], MAI_TESTIMONIALS_VERSION, true );
+		wp_enqueue_style( 'mai-testimonials-editor', MAI_TESTIMONIALS_PLUGIN_URL . "assets/css/mai-testimonials-editor{$suffix}.css", [], MAI_TESTIMONIALS_VERSION . '.' . date( 'njYHi', filemtime( MAI_TESTIMONIALS_PLUGIN_DIR . "assets/css/mai-testimonials-editor{$suffix}.css" ) ) );
+		wp_enqueue_script( 'mai-testimonials-editor', MAI_TESTIMONIALS_PLUGIN_URL . "assets/js/mai-testimonials-editor{$suffix}.js", [], MAI_TESTIMONIALS_VERSION . '.' . date( 'njYHi', filemtime( MAI_TESTIMONIALS_PLUGIN_DIR . "assets/js/mai-testimonials-editor{$suffix}.js" ) ), true );
 	}
 	// Front end.
 	else {
 		// Slider.
-		wp_enqueue_script( 'mai-testimonials', MAI_TESTIMONIALS_PLUGIN_URL . "assets/js/mai-testimonials{$suffix}.js", [], MAI_TESTIMONIALS_VERSION, true );
+		wp_enqueue_script( 'mai-testimonials', MAI_TESTIMONIALS_PLUGIN_URL . "assets/js/mai-testimonials{$suffix}.js", [], MAI_TESTIMONIALS_VERSION . '.' . date( 'njYHi', filemtime( MAI_TESTIMONIALS_PLUGIN_DIR . "assets/js/mai-testimonials{$suffix}.js" ) ), true );
 		wp_localize_script( 'mai-testimonials', 'maiTestimonialsVars',
 			[
 				'ajaxurl' => admin_url( 'admin-ajax.php' ),
