@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  *
  * @access private
  *
- * @since TBD
+ * @since 2.4.0
  *
  * @param bool $preview If admin editor preview or not.
  *
@@ -43,7 +43,7 @@ function mai_enqueue_testimonials_styles( $preview = false ) {
  *
  * @access private
  *
- * @since TBD
+ * @since 2.4.0
  *
  * @return string
  */

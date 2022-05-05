@@ -4,7 +4,7 @@
  * Plugin Name:     Mai Testimonials
  * Plugin URI:      https://bizbudding.com/products/mai-testimonials/
  * Description:     Manage and display testimonials on your website.
- * Version:         2.3.1
+ * Version:         2.4.0
  *
  * Author:          BizBudding
  * Author URI:      https://bizbudding.com
@@ -88,7 +88,7 @@ final class Mai_Testimonials_Plugin {
 
 		// Plugin version.
 		if ( ! defined( 'MAI_TESTIMONIALS_VERSION' ) ) {
-			define( 'MAI_TESTIMONIALS_VERSION', '2.3.1' );
+			define( 'MAI_TESTIMONIALS_VERSION', '2.4.0' );
 		}
 
 		// Plugin Folder Path.
@@ -196,60 +196,12 @@ final class Mai_Testimonials_Plugin {
 	}
 
 	/**
-	 * Sets up the plugin.
-	 * Checks for engine plugins.
+	 * Flushes permalinks upon activation.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return void
 	 */
-	// function setup() {
-	// 	// Bail if no engine is anywhere.
-	// 	if ( ! ( class_exists( 'Mai_Theme_Engine' ) || class_exists( 'Mai_Engine' ) ) ) {
-	// 		add_action( 'admin_notices', [ $this, 'admin_notice' ] );
-	// 		return;
-	// 	}
-
-	// 	// Run.
-	// 	$this->hooks();
-
-	// 	// Bail if Genesis is not running.
-	// 	if ( ! function_exists( 'genesis' ) ) {
-	// 		return;
-	// 	}
-
-	// 	// Mai Theme v1.
-	// 	if ( class_exists( 'Mai_Theme_Engine' ) ) {
-	// 		$grid  = new Mai_Testimonials_Grid_Shortcode;
-	// 	}
-	// 	// Mai Theme v2.
-	// 	elseif ( class_exists( 'Mai_Engine' ) ) {
-	// 		$grid  = new Mai_Testimonials_Grid_Block;
-	// 		$block = new Mai_Testimonials_Block;
-	// 	}
-	// }
-
-	// /**
-	//  * Displays admin notice.
-	//  *
-	//  * @since 0.1.0
-	//  *
-	//  * @return void
-	//  */
-	// function admin_notice() {
-	// 	printf( '<div class="notice notice-warning is-dismissible"><p>%s</p></div>', __( 'Mai Testimonials requires Mai Theme and it\'s Engine plugin in order to run.', 'mai-testimonials' ) );
-	// 	if ( isset( $_GET['activate'] ) ) {
-	// 		unset( $_GET['activate'] );
-	// 	}
-	// }
-
-	// /**
-	//  * Flushes permalinks upon activation.
-	//  *
-	//  * @since 0.1.0
-	//  *
-	//  * @return void
-	//  */
 	function activate() {
 		$this->register_content_types();
 		flush_rewrite_rules();
@@ -352,7 +304,7 @@ final class Mai_Testimonials_Plugin {
 	/**
 	 * Runs plugin if Mai Engine is active.
 	 *
-	 * @since TBD
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -392,7 +344,7 @@ final class Mai_Testimonials_Plugin {
 	/**
 	 * Displays admin notice if no genesis.
 	 *
-	 * @since TBD
+	 * @since 2.4.0
 	 *
 	 * @return void
 	 */
@@ -414,7 +366,7 @@ final class Mai_Testimonials_Plugin {
 	/**
 	 * Displays admin notice if engine version is too old.
 	 *
-	 * @since TBD
+	 * @since 2.4.0
 	 *
 	 * @return void
 	 */

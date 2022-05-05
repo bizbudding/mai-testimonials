@@ -1,7 +1,13 @@
 # Changelog
 
-## 2.4.0 (TBD)
+## 2.4.0 (5/5/22)
+* Added: Details Alignment setting on Mai Testimonials block.
+* Added: Margin settings on Mai Testimonials block.
+* Added: Support for FacetWP and SearchWP without needing any custom code.
 * Changed: Post type is now public so it works out of the box with SearchWP and FacetWP and similar plugins. Singular views are still not enabled because publicly_queryable is still false.
+* Changed: Now using cloned fields registered in Mai Engine for performance and consistency in the UI.
+* Fixed: Dots were dislaying dark still when nested in a dark background block.
+* Fixed: PHP error when trying to activate without Mai Engine plugin active.
 
 ## 2.3.1 (3/2/22)
 * Fixed: Allow slider dots to wrap if showing more than the container can fit.

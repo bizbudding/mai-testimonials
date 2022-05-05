@@ -11,7 +11,7 @@ class Mai_Testimonials_Content_Types {
 	/**
 	 * Runs hooks.
 	 *
-	 * @since TBD
+	 * @since 2.0.0
 	 *
 	 * @return void
 	 */
