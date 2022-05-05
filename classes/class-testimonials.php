@@ -15,9 +15,11 @@ class Mai_Testimonials {
 	function __construct( $args ) {
 		$args = wp_parse_args( $args,
 			[
+				'preview'                => false,
 				'paged'                  => 1,
 				'font_size'              => '',
 				'text_align'             => '',
+				'details_align'          => '',
 				'image_location'         => '',
 				'author_location'        => '',
 				'show'                   => [ 'name', 'image', 'byline' ],
@@ -38,6 +40,8 @@ class Mai_Testimonials {
 				'align_columns_vertical' => '',
 				'column_gap'             => 'md',
 				'row_gap'                => 'md',
+				'margin_top'             => '',
+				'margin_bottom'          => '',
 				'boxed'                  => '',
 				'slider'                 => false,
 				'slider_show'            => [ 'arrows', 'dots' ],
@@ -48,9 +52,11 @@ class Mai_Testimonials {
 
 		// Sanitize.
 		$args = [
+			'preview'                => mai_sanitize_bool( $args['preview'] ),
 			'paged'                  => absint( $args['paged'] ),
 			'font_size'              => esc_html( $args['font_size'] ),
 			'text_align'             => esc_html( $args['text_align'] ),
+			'details_align'          => esc_html( $args['details_align'] ),
 			'image_location'         => esc_html( $args['image_location'] ),
 			'author_location'        => esc_html( $args['author_location'] ),
 			'show'                   => array_map( 'esc_html', (array) $args['show'] ),
@@ -71,6 +77,8 @@ class Mai_Testimonials {
 			'align_columns_vertical' => esc_html( $args['align_columns_vertical'] ),
 			'column_gap'             => esc_html( $args['column_gap'] ),
 			'row_gap'                => esc_html( $args['row_gap'] ),
+			'margin_top'             => esc_html( $args['margin_top'] ),
+			'margin_bottom'          => esc_html( $args['margin_bottom'] ),
 			'boxed'                  => mai_sanitize_bool( $args['boxed'] ),
 			'slider'                 => mai_sanitize_bool( $args['slider'] ),
 			'slider_show'            => array_map( 'esc_html', (array) $args['slider_show'] ),
@@ -78,13 +86,14 @@ class Mai_Testimonials {
 			'class'                  => esc_html( $args['class'] ),
 		];
 
-		$this->args       = $args;
-		$this->query_args = $this->get_query_args();
-		$show_keys        = array_flip( $this->args['show'] );
-		$this->has_image  = isset( $show_keys['image'] );
-		$this->has_name   = isset( $show_keys['name'] );
-		$this->has_byline = isset( $show_keys['byline'] );
-		$this->has_slider = $this->args['slider'] && count( $this->args['slider_show'] ) >= 1;
+		$this->args        = $args;
+		$this->query_args  = $this->get_query_args();
+		$show_keys         = array_flip( $this->args['show'] );
+		$this->has_image   = isset( $show_keys['image'] );
+		$this->has_name    = isset( $show_keys['name'] );
+		$this->has_byline  = isset( $show_keys['byline'] );
+		$this->has_url     = isset( $show_keys['url'] );
+		$this->has_slider  = $this->args['slider'] && count( $this->args['slider_show'] ) >= 1;
 	}
 
 	/**
@@ -129,7 +138,7 @@ class Mai_Testimonials {
 					$this->slider_max = $this->args['slider_max'] ? min( $this->args['slider_max'], (int) $query->max_num_pages ) : (int) $query->max_num_pages;
 				}
 
-				$attributes = [
+				$atts = [
 					'class'        => 'mait-slider',
 					'data-args'    => esc_html( json_encode( $this->args ), ENT_QUOTES, 'UTF-8' ),
 					'data-current' => $this->args['paged'],
@@ -138,12 +147,21 @@ class Mai_Testimonials {
 					'data-max'     => $this->slider_max,
 				];
 
+				// Margin. If not a slider this is on the testimonials container.
+				if ( $this->args['margin_top'] ) {
+					$atts['class'] = mai_add_classes( sprintf( 'has-%s-margin-top', $this->args['margin_top'] ), $atts['class'] );
+				}
+
+				if ( $this->args['margin_bottom'] ) {
+					$atts['class'] = mai_add_classes( sprintf( 'has-%s-margin-bottom', $this->args['margin_bottom'] ), $atts['class'] );
+				}
+
 				$html .= genesis_markup(
 					[
 						'open'    => '<div %s>',
 						'context' => 'testimonials-slider',
 						'echo'    => false,
-						'atts'    => $attributes,
+						'atts'    => $atts,
 						'params'  => [
 							'args' => $this->args,
 						],
@@ -163,9 +181,30 @@ class Mai_Testimonials {
 						$name     = $name ? sprintf( '<span class="mait-name">%s</span>', $name ) : '';
 						$byline   = $this->has_byline ? get_post_meta( get_the_ID(), 'byline', true ) : '';
 						$byline   = $byline ? sprintf( '<span class="mait-byline">%s</span>', $byline ) : '';
-						$details  = $this->get_details( $image, $name, $byline );
+						$url      = $this->has_url ? get_post_meta( get_the_ID(), 'url', true ) : '';
 
-						$html .= '<div class="mait-testimonial">';
+						if ( $url ) {
+							$parsed = wp_parse_url( $url );
+							$url    = sprintf( '<span class="mait-url"><a target="_blank" rel="nofollow noopener" href="%s">%s</a></span>', esc_url( $url ), $parsed['host'] );
+						}
+
+						// Build details.
+						$details  = $this->get_details( $image, $name, $byline, $url );
+
+						$html .= genesis_markup(
+							[
+								'open'    => '<div %s>',
+								'close'   => '',
+								'context' => 'testimonial',
+								'echo'    => false,
+								'atts'    => [
+									'class' => 'mait-testimonial',
+								],
+								'params'  => [
+									'args' => $this->args,
+								],
+							]
+						);
 
 							if ( 'before' === $this->args['image_location'] ) {
 								$html .= $image ?: '';
@@ -175,7 +214,21 @@ class Mai_Testimonials {
 								$html .= $details ?: '';
 							}
 
-							$html .= sprintf( '<div class="mait-content">%s</div>', mai_get_processed_content( $content ) );
+							$html .= genesis_markup(
+								[
+									'open'    => '<div %s>',
+									'close'   => '</div>',
+									'context' => 'testimonial-content',
+									'content' => mai_get_processed_content( $content ),
+									'echo'    => false,
+									'atts'    => [
+										'class' => 'mait-content',
+									],
+									'params'  => [
+										'args' => $this->args,
+									],
+								]
+							);
 
 							if ( 'after' === $this->args['image_location'] ) {
 								$html .= $image ?: '';
@@ -185,7 +238,17 @@ class Mai_Testimonials {
 								$html .= $details ?: '';
 							}
 
-						$html .= '</div>';
+						$html .= genesis_markup(
+							[
+								'open'    => '',
+								'close'   => '</div>',
+								'context' => 'testimonial',
+								'echo'    => false,
+								'params'  => [
+									'args' => $this->args,
+								],
+							]
+						);
 
 					endwhile;
 
@@ -316,61 +379,88 @@ class Mai_Testimonials {
 	 * @return string
 	 */
 	function get_open() {
-		$attributes = [
+		$atts = [
 			'class' => mai_add_classes( 'mait-testimonials', $this->args['class'] ),
-			'style' => '',
 		];
+
+		$atts             = mai_get_columns_atts( $atts, $this->args );
+		$has_image_inside = $this->has_image && 'inside' === $this->args['image_location'];
+		$has_details      = $has_image_inside || $this->has_name || $this->has_byline || $this->has_url;
 
 		// Boxed.
 		if ( $this->args['boxed'] ) {
-			$attributes['class'] .= ' has-boxed';
+			$atts['class'] .= ' has-boxed';
+		}
+
+		// Margin. If slider this is on the slider container.
+		if ( ! ( $this->has_slider && 1 === $this->args['paged'] ) ) {
+			if ( $this->args['margin_top'] ) {
+				$atts['class'] = mai_add_classes( sprintf( 'has-%s-margin-top', $this->args['margin_top'] ), $atts['class'] );
+			}
+
+			if ( $this->args['margin_bottom'] ) {
+				$atts['class'] = mai_add_classes( sprintf( 'has-%s-margin-bottom', $this->args['margin_bottom'] ), $atts['class'] );
+			}
 		}
 
 		// Font size.
 		if ( $this->args['font_size'] ) {
-			$attributes['style'] .= sprintf( '--testimonial-font-size:var(--font-size-%s);', $this->args['font_size'] );
+			$atts['style'] .= sprintf( '--testimonial-font-size:var(--font-size-%s);', $this->args['font_size'] );
 		}
 
 		// Text align.
 		if ( $this->args['text_align'] ) {
-			$attributes['style'] .= sprintf( '--testimonial-text-align:%s;', $this->args['text_align'] );
+			$atts['style'] .= sprintf( '--testimonial-text-align:%s;', $this->args['text_align'] );
 		}
 
-		// Get the columns breakpoint array.
-		$columns = mai_get_breakpoint_columns( $this->args );
+		// Details.
+		if ( $has_details ) {
+			if ( 'before' === $this->args['author_location'] ) {
+				$atts['style'] .= '--testimonial-details-margin:0 0 var(--spacing-md);';
+			}
 
-		$attributes['style'] .= sprintf( '--columns-lg:%s;', $columns['lg'] );
-		$attributes['style'] .= sprintf( '--columns-md:%s;', $columns['md'] );
-		$attributes['style'] .= sprintf( '--columns-sm:%s;', $columns['sm'] );
-		$attributes['style'] .= sprintf( '--columns-xs:%s;', $columns['xs'] );
+			// Details align.
+			if ( $this->args['details_align'] ) {
+				$atts['style'] .= sprintf( '--testimonial-details-justify-content:%s;', $this->args['details_align'] );
 
-		// Column/Row gap.
-		$column_gap = $this->args['column_gap'] ? sprintf( 'var(--spacing-%s)', $this->args['column_gap'] ) : '0px'; // Needs 0px for calc().
-		$row_gap    = $this->args['row_gap'] ? sprintf( 'var(--spacing-%s)', $this->args['row_gap'] ) : '0px'; // Needs 0px for calc().
-
-		$attributes['style'] .= sprintf( '--column-gap:%s;', $column_gap  );
-		$attributes['style'] .= sprintf( '--row-gap:%s;', $row_gap );
-
-		// Align columns.
-		if ( $this->args['align_columns'] ) {
-			$attributes['style'] .= sprintf( '--align-columns:%s;', mai_get_flex_align( $this->args['align_columns'] ) );
+				// No image, text can align.
+				if ( ! $has_image_inside ) {
+					$atts['style'] .= sprintf( '--testimonial-details-text-align:%s;', $this->args['details_align'] );
+				}
+				/**
+				 * Has image.
+				 * Start or center align with an image should both align text to start.
+				 * End is the only setting with text aligned end.
+				 */
+				else {
+					if ( 'end' === $this->args['details_align'] ) {
+						$atts['style'] .= '--testimonial-details-text-align:end;';
+					} else {
+						$atts['style'] .= '--testimonial-details-text-align:start;';
+					}
+				}
+			}
 		}
 
-		if ( $this->args['align_columns_vertical'] ) {
-			$attributes['style'] .= sprintf( '--align-columns-vertical:%s;', mai_get_flex_align( $this->args['align_columns_vertical'] ) );
+		if ( $has_image_inside ) {
+			$atts['style'] .= '--testimonial-image-margin:0;';
 		}
 
-		if ( 'before' === $this->args['author_location'] ) {
-			$attributes['style'] .= '--testimonial-details-margin:0 0 var(--spacing-md);';
-		}
-
-		if ( 'inside' === $this->args['image_location'] && ( $this->has_name || $this->has_byline ) ) {
-			$attributes['style'] .= '--testimonial-image-margin:0 var(--spacing-md) 0 0;--testimonial-details-text-align:left;';
-		}
+		// if ( ! $this->args['details_align'] || ( $this->args['details_align'] && 'inside' === $this->args['image_location'] && ( $this->has_name || $this->has_byline || $this->has_url ) ) ) {
+		// 	if ( ! $this->args['details_align'] ) {
+		// 		$atts['style'] .= '--testimonial-image-margin:0 var(--spacing-md) 0 0;--testimonial-details-text-align:start;';
+		// 	} else {
+		// 		if ( in_array( $this->args['details_align'], [ 'start, center' ] ) ) {
+		// 			$atts['style'] .= '--testimonial-image-margin:0 var(--spacing-md) 0 0;--testimonial-details-text-align:start;';
+		// 		} else {
+		// 			$atts['style'] .= '--testimonial-image-margin:0 0 0 var(--spacing-md);--testimonial-details-text-align:end;';
+		// 		}
+		// 	}
+		// }
 
 		// Current page.
 		if ( $this->args['paged'] ) {
-			$attributes['data-slide'] = $this->args['paged'];
+			$atts['data-slide'] = $this->args['paged'];
 		}
 
 		return genesis_markup(
@@ -378,7 +468,7 @@ class Mai_Testimonials {
 				'open'    => '<div %s>',
 				'context' => 'testimonials',
 				'echo'    => false,
-				'atts'    => $attributes,
+				'atts'    => $atts,
 				'params'  => [
 					'args' => $this->args,
 				],
@@ -415,21 +505,27 @@ class Mai_Testimonials {
 	 * @param string $image  Image value.
 	 * @param string $name   Name value.
 	 * @param string $byline Byline value.
+	 * @param string $url    Url value.
 	 *
 	 * @return string
 	 */
-	function get_details( $image = '', $name = '', $byline = '' ) {
+	function get_details( $image = '', $name = '', $byline = '', $url = '' ) {
 		$html = '';
 
-		if ( 'inside' === $this->args['image_location'] ) {
+		if ( $this->has_image && 'inside' === $this->args['image_location'] && 'end' !== $this->args['details_align'] ) {
 			$html .= $image ?: '';
 		}
 
-		if ( $name || $byline ) {
+		if ( $name || $byline || $url ) {
 			$html .= '<div class="mait-author">';
 				$html .= $name ?: '';
 				$html .= $byline ?: '';
+				$html .= $url ?: '';
 			$html .= '</div>';
+		}
+
+		if ( $this->has_image && 'inside' === $this->args['image_location'] && 'end' === $this->args['details_align'] ) {
+			$html .= $image ?: '';
 		}
 
 		if ( ! $html ) {
