@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.4.1 (5/5/22)
+* Fixed: Assets not using current version for cache busting.
+
 ## 2.4.0 (5/5/22)
 * Added: Details Alignment setting on Mai Testimonials block.
 * Added: Margin settings on Mai Testimonials block.
