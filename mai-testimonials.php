@@ -325,7 +325,7 @@ final class Mai_Testimonials_Plugin {
 		$types = new Mai_Testimonials_Content_Types;
 
 		// Bail if v2 engine is too old.
-		if ( class_exists( 'Mai_Engine' ) && ! version_compare( mai_get_version(), '2.21', '>' ) ) {
+		if ( class_exists( 'Mai_Engine' ) && ( ! function_exists( 'mai_get_version' ) || ! version_compare( mai_get_version(), '2.21', '>' ) ) ) {
 			add_action( 'admin_notices', [ $this, 'admin_notice_version' ] );
 			return;
 		}
