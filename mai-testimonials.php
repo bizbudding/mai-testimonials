@@ -149,7 +149,7 @@ final class Mai_Testimonials_Plugin {
 		register_activation_hook(   __FILE__, [ $this, 'activate' ] );
 		register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
 
-		add_action( 'admin_init',        [ $this, 'updater' ] );
+		add_action( 'plugins_loaded',    [ $this, 'updater' ] );
 		add_action( 'init',              [ $this, 'register_content_types' ] );
 		add_action( 'after_setup_theme', [ $this, 'run' ] ); // Plugins loaded is too early to check for engine version.
 	}
