@@ -9,6 +9,7 @@
 }
 
 .mait-slider .mait-testimonials {
+	position: relative;
 	grid-area: testimonials;
 }
 
@@ -289,5 +290,82 @@
 
 	100% {
 		opacity: 0;
+	}
+}
+
+.mai-testimonials-loading__overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	display: grid;
+	width: 100%;
+	height: 100%;
+	place-items: center;
+}
+
+.mai-testimonials-loading__ring {
+	width: 2em;
+	height: 2em;
+	vertical-align: middle;
+	transform-origin: center;
+	-webkit-animation: mai-testimonials-rotate 2s linear infinite;
+	animation: mai-testimonials-rotate 2s linear infinite;
+}
+
+.mai-testimonials-loading__ring circle {
+	fill: none;
+	stroke: var(--color-body, currentColor);
+	stroke-dasharray: 1, 200;
+	stroke-dashoffset: 0;
+	stroke-linecap: round;
+	-webkit-animation: mai-testimonials-stretch calc(2s * 0.75) ease-in-out infinite;
+	animation: mai-testimonials-stretch calc(2s * 0.75) ease-in-out infinite;
+}
+
+@-webkit-keyframes mai-testimonials-rotate {
+
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes mai-testimonials-rotate {
+
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+@-webkit-keyframes mai-testimonials-stretch {
+
+	0% {
+		stroke-dasharray: 1, 200;
+		stroke-dashoffset: 0;
+	}
+
+	50% {
+		stroke-dasharray: 90, 200;
+		stroke-dashoffset: -35px;
+	}
+
+	100% {
+		stroke-dashoffset: -124px;
+	}
+}
+
+@keyframes mai-testimonials-stretch {
+
+	0% {
+		stroke-dasharray: 1, 200;
+		stroke-dashoffset: 0;
+	}
+
+	50% {
+		stroke-dasharray: 90, 200;
+		stroke-dashoffset: -35px;
+	}
+
+	100% {
+		stroke-dashoffset: -124px;
 	}
 }

@@ -1,15 +1,5 @@
 ( function() {
-	// var allSliders    = document.querySelectorAll( '.mait-slider' );
 	var sliderButtons = document.querySelectorAll( '.mait-button' );
-	// var hasFocus      = false;
-	// var prevPage      = 1;
-	// var nextPage      = 1;
-	// var paged         = 1;
-	// var slider        = false;
-	// var slide         = false;
-	// var current       = false;
-	// var existing      = false;
-	// var args          = false;
 
 	/**
 	 * Gets testimonials.
@@ -17,12 +7,12 @@
 	 var getTestimonials = function( event ) {
 		event.preventDefault();
 
-		if ( event.target.getAttribute( 'data-disabled' ) ) {
+		if ( event.target.dataset.disabled ) {
 			return;
 		}
 
 		slider = event.target.closest( '.mait-slider' );
-		paged  = event.target.getAttribute( 'data-slide' );
+		paged  = event.target.dataset.slide;
 
 		getSlide( slider, paged );
 	};
@@ -55,10 +45,10 @@
 		if ( keys.includes( event.key ) ) {
 			switch (event.key) {
 				case 'ArrowLeft':
-					paged = slider.getAttribute( 'data-prev' );
+					paged = slider.dataset.prev;
 				break;
 				case 'ArrowRight':
-					paged = slider.getAttribute( 'data-next' );
+					paged = slider.dataset.next;
 				break;
 			}
 
@@ -70,16 +60,17 @@
 	 * Gets testimonials slide.
 	 */
 	var getSlide = function( slider, paged ) {
-		current  = slider.querySelector( '.mait-testimonials[data-slide="' + slider.getAttribute( 'data-current' ) + '"]' );
+		current  = slider.querySelector( '.mait-testimonials[data-slide="' + slider.dataset.current + '"]' );
 		existing = slider.querySelector( '.mait-testimonials[data-slide="' + paged + '"]' );
 
+		current.innerHTML += '<span class="mai-testimonials-loading__overlay"><svg class="mai-testimonials-loading__ring" viewBox="25 25 50 50" stroke-width="5"><circle cx="50" cy="50" r="20" /></svg>';
 		current.classList.add( 'mait-loading' );
 
 		if ( existing ) {
 			doNextSlide( slider, paged );
 
 		} else {
-			args       = JSON.parse( slider.getAttribute( 'data-args' ) );
+			args       = JSON.parse( slider.dataset.args );
 			args.paged = paged;
 
 			var data = {
@@ -131,7 +122,7 @@
 		// Show new slide.
 		showSlide( slider.querySelector( '.mait-testimonials[data-slide="' + paged + '"]' ) );
 
-		var max      = parseInt( slider.getAttribute( 'data-max' ) );
+		var max      = parseInt( slider.dataset.max );
 		var prevPage = paged - 1;
 		var nextPage = paged + 1;
 
@@ -146,7 +137,7 @@
 		// Set slider attributes.
 		slider.setAttribute( 'data-prev', prevPage );
 		slider.setAttribute( 'data-next', nextPage );
-		slider.setAttribute( 'data-slide', paged );
+		slider.setAttribute( 'data-current', paged );
 
 		// Enable currently disabled dot.
 		var disabled = slider.querySelector( '.mait-dot[data-disabled="true"]' );
@@ -178,6 +169,7 @@
 
 		// Done loading.
 		current.classList.remove( 'mait-loading' );
+		slider.querySelector( '.mai-testimonials-loading__overlay' ).remove();
 	};
 
 	/**

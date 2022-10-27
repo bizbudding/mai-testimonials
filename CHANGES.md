@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.2 (10/27/22)
+* Fixed: Error if Mai Engine is deactivated or deleted while Mai Testimonials is still active.
+* Changed: Moved updater to later hook per package recommendations.
+
 ## 2.4.1 (5/5/22)
 * Fixed: Assets not using current version for cache busting.
 
