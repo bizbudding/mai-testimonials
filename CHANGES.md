@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2.4.2 (10/27/22)
+* Added: New loading icon when viewing next slide in Mai Testimonials slider block.
 * Fixed: Error if Mai Engine is deactivated or deleted while Mai Testimonials is still active.
 * Changed: Moved updater to later hook per package recommendations.
 
