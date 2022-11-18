@@ -647,7 +647,7 @@ class Mai_Testimonials {
 	/**
 	 * Gets arrow icons. Uses Mai v2 config if available.
 	 *
-	 * @since TBD
+	 * @since 2.5.0
 	 *
 	 * @return array
 	 */

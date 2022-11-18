@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.5.0 (11/18/22)
+* Changed: Uses Mai Theme v2 config for arrow icons when using Mai Testimonials slider block.
+* Fixed: Mai Testimonials slider block now works with nested elements like SVGs.
+* Fixed: [Developers] Wrong filter name for previous/next arrow.
+
 ## 2.4.2 (10/27/22)
 * Added: New loading icon when viewing next slide in Mai Testimonials slider block.
 * Fixed: Error if Mai Engine is deactivated or deleted while Mai Testimonials is still active.
