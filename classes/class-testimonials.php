@@ -618,11 +618,12 @@ class Mai_Testimonials {
 	 * @return string
 	 */
 	function get_previous_arrow( $query ) {
-		$icon     = apply_filters( 'mai_testimonials_previous_arrow', '←' );
+		$arrows   = $this->get_icons();
+		$icon     = apply_filters( 'mai_testimonials_previous_arrow', $arrows['previous'] );
 		$classes  = 'mait-button mait-previous';
 		$classes .= is_admin() ? ' button' : '';
 
-		return sprintf( '<button class="%s" data-slide="%s">%s</button>', $classes, $this->get_prev_page( $query ), wp_kses_post( $icon ) );
+		return sprintf( '<button class="%s" data-slide="%s">%s</button>', $classes, $this->get_prev_page( $query ), $icon );
 	}
 
 	/**
@@ -635,11 +636,53 @@ class Mai_Testimonials {
 	 * @return string
 	 */
 	function get_next_arrow( $query ) {
-		$icon     = apply_filters( 'mai_testimonials_previous_arrow', '→' );
+		$arrows   = $this->get_icons();
+		$icon     = apply_filters( 'mai_testimonials_next_arrow', $arrows['next'] );
 		$classes  = 'mait-button mait-next';
 		$classes .= is_admin() ? ' button' : '';
 
-		return sprintf( '<button class="%s" data-slide="%s">%s</button>', $classes, $this->get_next_page( $query ), wp_kses_post( $icon ) );
+		return sprintf( '<button class="%s" data-slide="%s">%s</button>', $classes, $this->get_next_page( $query ), $icon );
+	}
+
+	/**
+	 * Gets arrow icons. Uses Mai v2 config if available.
+	 *
+	 * @since TBD
+	 *
+	 * @return array
+	 */
+	function get_icons() {
+		static $arrows = null;
+
+		if ( ! is_null( $arrows ) ) {
+			return $arrows;
+		}
+
+		$arrows = [
+			'previous' => '←',
+			'next'     => '→',
+		];
+
+		if ( function_exists( 'mai_get_config' ) ) {
+			$icons = mai_get_config( 'settings' )['icons'];
+			$prev  = isset( $icons['pagination-previous'] ) ? $icons['pagination-previous'] : [];
+			$prev  = isset( $prev['icon'] ) ? $prev['icon'] : '';
+			$next  = isset( $icons['pagination-next'] ) ? $icons['pagination-next'] : [];
+			$next  = isset( $next['icon'] ) ? $next['icon'] : '';
+
+			if ( $prev && $next ) {
+				$atts = [
+					'class' => 'mait-arrow-icon',
+					'role'  => 'button',
+					'fill'  => 'currentColor',
+				];
+
+				$arrows['previous'] = mai_get_svg_icon( $prev, isset( $prev['style'] ) ? $prev['style'] : 'light', $atts );
+				$arrows['next']     = mai_get_svg_icon( $next, isset( $next['style'] ) ? $next['style'] : 'light', $atts );
+			}
+		}
+
+		return $arrows;
 	}
 
 	/**
