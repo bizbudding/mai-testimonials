@@ -7,12 +7,14 @@
 	 var getTestimonials = function( event ) {
 		event.preventDefault();
 
-		if ( event.target.dataset.disabled ) {
+		var el = event.target.classList.contains( 'mait-button' ) ? event.target : event.target.parentElement;
+
+		if ( el.dataset.disabled ) {
 			return;
 		}
 
-		slider = event.target.closest( '.mait-slider' );
-		paged  = event.target.dataset.slide;
+		slider = el.closest( '.mait-slider' );
+		paged  = el.dataset.slide;
 
 		getSlide( slider, paged );
 	};
