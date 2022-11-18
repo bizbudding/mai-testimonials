@@ -183,6 +183,11 @@
 	height: var(--spacing-xl);
 }
 
+.mait-arrow-icon {
+	width: 1em;
+	height: 1em;
+}
+
 .has-boxed {
 	--testimonial-padding: var(--spacing-xl);
 	--testimonial-background: var(--color-white);
