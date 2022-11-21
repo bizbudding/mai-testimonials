@@ -209,6 +209,7 @@
 
 .mait-hidden {
 	z-index: 0;
+	height: 0;
 	opacity: 0;
 	-webkit-animation: maitsliderfadeout 0.5s;
 	animation: maitsliderfadeout 0.5s;
