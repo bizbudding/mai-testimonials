@@ -222,7 +222,7 @@
 	/**
 	 * Handles side swipe for sliders.
 	 *
-	 * @since TBD
+	 * @since 2.6.0
 	 * @link  https://gist.github.com/SleepWalker/da5636b1abcbaff48c4d#gistcomment-3753498
 	 */
 	sliders.forEach( function( slider ) {

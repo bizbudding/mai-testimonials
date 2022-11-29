@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.6.0 (TBD)
+## 2.6.0 (11/29/22)
 * Added: Mai Testimonials sliders now handle left/right swipe motion for previous/next slides.
 * Changed: Slider height changes for each slide, so dots and arrows remain close to the bottom of the testimonials content.
 * Fixed: Slide not changing correctly when using arrow keys with multiple levels of nested elements.
