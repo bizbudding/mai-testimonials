@@ -1,5 +1,6 @@
 ( function() {
-	var sliderButtons = document.querySelectorAll( '.mait-button' );
+	let sliders       = document.querySelectorAll( '.mait-slider' );
+	let sliderButtons = document.querySelectorAll( '.mait-button' );
 
 	/**
 	 * Gets testimonials.
@@ -7,7 +8,7 @@
 	 var getTestimonials = function( event ) {
 		event.preventDefault();
 
-		var el = event.target.classList.contains( 'mait-button' ) ? event.target : event.target.parentElement;
+		var el = event.target.classList.contains( 'mait-button' ) ? event.target : event.target.closest( '.mait-button' );
 
 		if ( el.dataset.disabled ) {
 			return;
@@ -218,4 +219,42 @@
 	 */
 	document.body.addEventListener( 'keydown', handleArrowKeys );
 
+	/**
+	 * Handles side swipe for sliders.
+	 *
+	 * @since 2.6.0
+	 * @link  https://gist.github.com/SleepWalker/da5636b1abcbaff48c4d#gistcomment-3753498
+	 */
+	sliders.forEach( function( slider ) {
+		let touchstartX = 0;
+		let touchstartY = 0;
+		let touchendX   = 0;
+		let touchendY   = 0;
+
+		// Set start values.
+		slider.addEventListener( 'touchstart', function( event ) {
+			touchstartX = event.changedTouches[0].screenX;
+			touchstartY = event.changedTouches[0].screenY;
+		}, false );
+
+		// Set end values and compare.
+		slider.addEventListener( 'touchend', function( event ) {
+			touchendX = event.changedTouches[0].screenX;
+			touchendY = event.changedTouches[0].screenY;
+
+			const delx = touchendX - touchstartX;
+			const dely = touchendY - touchstartY;
+
+			if ( Math.abs( delx ) > Math.abs( dely ) ) {
+				// Right.
+				if ( delx > 0 ) {
+					getSlide( slider, slider.dataset.next );
+				}
+				// Left.
+				else {
+					getSlide( slider, slider.dataset.prev );
+				}
+			}
+		}, false );
+	});
 } )();

@@ -252,9 +252,9 @@ class Mai_Testimonials {
 
 					endwhile;
 
-				$html .= '</div>';
+				$html .= '</div>'; // Inner.
 
-			$html .= '</div>';
+			$html .= '</div>'; // Open.
 
 			if ( $this->has_slider && 1 === $this->args['paged'] ) {
 				// If more than one page.
