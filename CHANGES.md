@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.6.1 (1/17/23)
+* Fixed: Mai Post Grid disable entry links setting not working.
+
 ## 2.6.0 (11/29/22)
 * Added: Mai Testimonials sliders now handle left/right swipe motion for previous/next slides.
 * Changed: Slider height changes for each slide, so dots and arrows remain close to the bottom of the testimonials content.
