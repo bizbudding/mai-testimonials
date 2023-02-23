@@ -612,6 +612,7 @@ class Mai_Testimonials {
 	 * Gets previous arrow.
 	 *
 	 * @since 2.3.0
+	 * @since 2.6.2 Added aria-label.
 	 *
 	 * @param WP_Query $query Query object.
 	 *
@@ -623,13 +624,14 @@ class Mai_Testimonials {
 		$classes  = 'mait-button mait-previous';
 		$classes .= is_admin() ? ' button' : '';
 
-		return sprintf( '<button class="%s" data-slide="%s">%s</button>', $classes, $this->get_prev_page( $query ), $icon );
+		return sprintf( '<button class="%s" data-slide="%s" aria-label="%s %s">%s</button>', $classes, $this->get_prev_page( $query ), __( 'Previous', 'mai-testimonials' ), $icon );
 	}
 
 	/**
 	 * Gets next arrow.
 	 *
 	 * @since 2.3.0
+	 * @since 2.6.2 Added aria-label.
 	 *
 	 * @param WP_Query $query Query object.
 	 *
@@ -641,7 +643,7 @@ class Mai_Testimonials {
 		$classes  = 'mait-button mait-next';
 		$classes .= is_admin() ? ' button' : '';
 
-		return sprintf( '<button class="%s" data-slide="%s">%s</button>', $classes, $this->get_next_page( $query ), $icon );
+		return sprintf( '<button class="%s" data-slide="%s" aria-label="%s %s">%s</button>', $classes, $this->get_next_page( $query ), __( 'Next', 'mai-testimonials' ), $icon );
 	}
 
 	/**

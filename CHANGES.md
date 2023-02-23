@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.6.2 (2/23/23)
+* Changed: Added aria-label to testimonial slider previous/next buttons.
+
 ## 2.6.1 (1/17/23)
 * Fixed: Mai Post Grid disable entry links setting not working.
 
