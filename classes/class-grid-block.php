@@ -17,7 +17,7 @@ class Mai_Testimonials_Grid_Block {
 	 * @return void
 	 */
 	function hooks() {
-		add_filter( 'mai_grid_post_types',                [ $this, 'post_types' ], 10, 3 );
+		add_filter( 'mai_grid_post_types',                [ $this, 'post_types' ] );
 		add_filter( 'mai_entry_content',                  [ $this, 'entry_content' ], 10, 3 );
 		add_filter( 'genesis_markup_entry_close',         [ $this, 'entry_schema' ], 10, 2 );
 		add_filter( 'genesis_markup_entry-title_content', [ $this, 'do_author_info' ], 10, 2 );
