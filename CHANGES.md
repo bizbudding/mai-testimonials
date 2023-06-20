@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.7.0 (6/20/23)
+* Changed: Update updater.
+* Fixed: Added gitignore file for repo tidiness.
+
 ## 2.6.3 (4/4/23)
 * Fixed: Wrong args number in Mai Post Grid post types filter.
 
