@@ -18,6 +18,7 @@ class Mai_Testimonials_Grid_Block {
 	 */
 	function hooks() {
 		add_filter( 'mai_grid_post_types',                [ $this, 'post_types' ] );
+		add_filter( 'mai_link_entry',                     [ $this, 'disable_entry_link' ], 10, 3 );
 		add_filter( 'mai_entry_content',                  [ $this, 'entry_content' ], 10, 3 );
 		add_filter( 'genesis_markup_entry_close',         [ $this, 'entry_schema' ], 10, 2 );
 		add_filter( 'genesis_markup_entry-title_content', [ $this, 'do_author_info' ], 10, 2 );
@@ -38,13 +39,41 @@ class Mai_Testimonials_Grid_Block {
 	 */
 	function post_types( $post_types ) {
 		$post_types[] = 'testimonial';
+
 		return array_unique( $post_types );
+	}
+
+	/**
+	 * Disables entry link if post type is testimonial.
+	 *
+	 * @since TBD
+	 *
+	 * @param bool            $link  If linking the entry.
+	 * @param array           $args  The grid block args.
+	 * @param WP_Post|WP_Term $entry The entry.
+	 *
+	 * @return bool
+	 */
+	function disable_entry_link( $link, $args, $entry ) {
+		if ( 'WP_Post' !== get_class( $entry ) ) {
+			return $link;
+		}
+
+		if ( 'testimonial' !== $entry->post_type ) {
+			return $link;
+		}
+
+		return false;
 	}
 
 	/**
 	 * Show full block content on testimonials.
 	 *
 	 * @since 2.1.0
+	 *
+	 * @param bool            $link  If linking the entry.
+	 * @param array           $args  The grid block args.
+	 * @param WP_Post|WP_Term $entry The entry.
 	 *
 	 * @return bool
 	 */
@@ -66,7 +95,7 @@ class Mai_Testimonials_Grid_Block {
 	 * @since 2.0.0
 	 *
 	 * @param string $close The closing markup.
-	 * @param array $args The entry args.
+	 * @param array  $args  The entry args.
 	 *
 	 * @return string
 	 */
@@ -106,7 +135,7 @@ class Mai_Testimonials_Grid_Block {
 	 * @since 2.0.0
 	 *
 	 * @param string $content The content.
-	 * @param array $args The entry args.
+	 * @param array  $args    The entry args.
 	 *
 	 * @return string
 	 */
@@ -139,9 +168,9 @@ class Mai_Testimonials_Grid_Block {
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param array $attributes The entry attributes.
-	 * @param string $context The entry context.
-	 * @param array $args The entry args.
+	 * @param array  $attributes The entry attributes.
+	 * @param string $context    The entry context.
+	 * @param array  $args       The entry args.
 	 *
 	 * @return array
 	 */
