@@ -173,6 +173,8 @@ class Mai_Testimonials {
 				$html .= $this->get_inner();
 
 					while ( $query->have_posts() ) : $query->the_post();
+						global $post;
+
 						$content  = get_the_content();
 						$image_id = $this->has_image ? get_post_thumbnail_id() : '';
 						$image    = $this->has_image && $image_id ? wp_get_attachment_image( $image_id, 'tiny' ) : '';
@@ -250,9 +252,13 @@ class Mai_Testimonials {
 							]
 						);
 
+						$this->add_review( $post );
+
 					endwhile;
 
 				$html .= '</div>'; // Inner.
+
+				$this->add_schema();
 
 			$html .= '</div>'; // Open.
 
@@ -723,6 +729,74 @@ class Mai_Testimonials {
 		}
 
 		return $page;
+	}
+
+	/**
+	 * Adds review schema to cache.
+	 *
+	 * @since TBD
+	 *
+	 * @param WP_Post The post object.
+	 *
+	 * @return void
+	 */
+	function add_review( $post ) {
+		$schema = [
+			'@type'        => 'Review',
+			'reviewRating' => [
+				'@type'       => 'Rating',
+				'ratingValue' => '5',
+			],
+			'author' => [
+				'@type' => 'Person',
+				'name'  => get_the_title( $post ),
+			],
+			'reviewBody' => mai_testimonials_get_schema_content( $post ),
+		];
+
+		$schema = apply_filters( 'mai_testimonials_review_schema', $schema, $post );
+
+		mai_testimonials_get_schema( $schema );
+	}
+
+	/**
+	 * Adds schemas
+	 *
+	 * @since TBD
+	 *
+	 * @return void
+	 */
+	function add_schema() {
+		$reviews = mai_testimonials_get_schema( [], true );
+
+		if ( ! $reviews ) {
+			return;
+		}
+
+		$total = $best = 0;
+
+		foreach ( $reviews as $review ) {
+			$total = $total + absint( $review['reviewRating']['ratingValue'] );
+			$best  = $best + 5;
+		}
+
+		$schema = [
+			'@context'        => 'https://schema.org/',
+			'@type'           => 'Organization',
+			'name'            => get_bloginfo( 'name' ),
+			// 'datePublished'   => '2023-06-07T12:19:25+00:00'
+			'aggregateRating' => [
+				'@type'       => 'AggregateRating',
+				'ratingValue' => $total,
+				'bestRating'  => $best,
+				'ratingCount' => count( $reviews ),
+			],
+			'review' => $reviews,
+		];
+
+		$schema = apply_filters( 'mai_testimonials_schema', $schema );
+
+		mai_testimonials_get_schemas( $schema );
 	}
 
 	/**

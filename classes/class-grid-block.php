@@ -110,23 +110,23 @@ class Mai_Testimonials_Grid_Block {
 
 		$post   = $args['params']['entry'];
 		$schema = [
-			'@context'     => 'https://schema.org/',
 			'@type'        => 'Review',
-			'itemReviewed' => [
-				'@type' => 'Organization',
-				'name'  => get_bloginfo( 'name' ),
+			'reviewRating' => [
+				'@type'       => 'Rating',
+				'ratingValue' => '5',
 			],
-			'author'       => [
+			'author' => [
 				'@type' => 'Person',
 				'name'  => get_the_title( $post ),
 			],
-			'reviewBody'   => get_the_content( $post ),
+			'reviewBody' => mai_testimonials_get_schema_content( $post ),
 		];
 
-		$schema = apply_filters( 'mai_testimonials_schema', $schema, $post );
-		$schema = $schema ? sprintf( '<script type="application/ld+json">%s</script>', json_encode( $schema ) ) : '';
+		$schema = apply_filters( 'mai_testimonials_review_schema', $schema, $post );
 
-		return $schema . $close;
+		mai_testimonials_get_schema( $schema );
+
+		return $close;
 	}
 
 	/**
@@ -149,12 +149,14 @@ class Mai_Testimonials_Grid_Block {
 
 		// Byline.
 		$byline = get_post_meta( $post_id, 'byline', true );
+
 		if ( $byline ) {
 			$content .= sprintf( '<span class="entry-byline">%s</span>', sanitize_text_field( $byline ) );
 		}
 
 		// Website URL.
 		$url = get_post_meta( $post_id, 'url', true );
+
 		if ( $url ) {
 			$url      = esc_url( $url );
 			$content .= sprintf( '<span class="entry-website"><a class="entry-website-link" href="%s" target="_blank" rel="noopener" itemprop="url">%s</a></span>', $url, $url );
@@ -178,9 +180,11 @@ class Mai_Testimonials_Grid_Block {
 		if ( ! $this->is_testimonial( $args ) ) {
 			return $attributes;
 		}
+
 		$attributes['itemprop']  = false;
 		$attributes['itemtype']  = false;
 		$attributes['itemscope'] = false;
+
 		return $attributes;
 	}
 
@@ -197,9 +201,11 @@ class Mai_Testimonials_Grid_Block {
 		if ( ! $args ) {
 			return;
 		}
+
 		if ( ! isset( $args['params']['args']['context'] ) || 'block' !== $args['params']['args']['context'] ) {
 			return false;
 		}
+
 		if ( ! ( isset( $args['params']['entry'] ) && is_object( $args['params']['entry'] ) && 'WP_Post' === get_class( $args['params']['entry'] ) ) ) {
 			return false;
 		}
