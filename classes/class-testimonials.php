@@ -374,6 +374,8 @@ class Mai_Testimonials {
 			}
 		}
 
+		$query_args = apply_filters( 'mai_testimonials_query_args', $query_args, $this->args );
+
 		return $query_args;
 	}
 
