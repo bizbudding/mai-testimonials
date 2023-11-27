@@ -18,6 +18,7 @@ class Mai_Testimonials_Grid_Block {
 	 */
 	function hooks() {
 		add_filter( 'mai_grid_post_types',                [ $this, 'post_types' ] );
+		add_filter( 'mai_link_entry',                     [ $this, 'disable_entry_link' ], 10, 3 );
 		add_filter( 'mai_entry_content',                  [ $this, 'entry_content' ], 10, 3 );
 		add_filter( 'genesis_markup_entry_close',         [ $this, 'entry_schema' ], 10, 2 );
 		add_filter( 'genesis_markup_entry-title_content', [ $this, 'do_author_info' ], 10, 2 );
@@ -38,13 +39,41 @@ class Mai_Testimonials_Grid_Block {
 	 */
 	function post_types( $post_types ) {
 		$post_types[] = 'testimonial';
+
 		return array_unique( $post_types );
+	}
+
+	/**
+	 * Disables entry link if post type is testimonial.
+	 *
+	 * @since TBD
+	 *
+	 * @param bool            $link  If linking the entry.
+	 * @param array           $args  The grid block args.
+	 * @param WP_Post|WP_Term $entry The entry.
+	 *
+	 * @return bool
+	 */
+	function disable_entry_link( $link, $args, $entry ) {
+		if ( 'WP_Post' !== get_class( $entry ) ) {
+			return $link;
+		}
+
+		if ( 'testimonial' !== $entry->post_type ) {
+			return $link;
+		}
+
+		return false;
 	}
 
 	/**
 	 * Show full block content on testimonials.
 	 *
 	 * @since 2.1.0
+	 *
+	 * @param bool            $link  If linking the entry.
+	 * @param array           $args  The grid block args.
+	 * @param WP_Post|WP_Term $entry The entry.
 	 *
 	 * @return bool
 	 */
@@ -66,7 +95,7 @@ class Mai_Testimonials_Grid_Block {
 	 * @since 2.0.0
 	 *
 	 * @param string $close The closing markup.
-	 * @param array $args The entry args.
+	 * @param array  $args  The entry args.
 	 *
 	 * @return string
 	 */
@@ -81,23 +110,23 @@ class Mai_Testimonials_Grid_Block {
 
 		$post   = $args['params']['entry'];
 		$schema = [
-			'@context'     => 'https://schema.org/',
 			'@type'        => 'Review',
-			'itemReviewed' => [
-				'@type' => 'Organization',
-				'name'  => get_bloginfo( 'name' ),
+			'reviewRating' => [
+				'@type'       => 'Rating',
+				'ratingValue' => '5',
 			],
-			'author'       => [
+			'author' => [
 				'@type' => 'Person',
 				'name'  => get_the_title( $post ),
 			],
-			'reviewBody'   => get_the_content( $post ),
+			'reviewBody' => mai_testimonials_get_schema_content( $post ),
 		];
 
-		$schema = apply_filters( 'mai_testimonials_schema', $schema, $post );
-		$schema = $schema ? sprintf( '<script type="application/ld+json">%s</script>', json_encode( $schema ) ) : '';
+		$schema = apply_filters( 'mai_testimonials_review_schema', $schema, $post );
 
-		return $schema . $close;
+		mai_testimonials_get_schema( $schema );
+
+		return $close;
 	}
 
 	/**
@@ -106,7 +135,7 @@ class Mai_Testimonials_Grid_Block {
 	 * @since 2.0.0
 	 *
 	 * @param string $content The content.
-	 * @param array $args The entry args.
+	 * @param array  $args    The entry args.
 	 *
 	 * @return string
 	 */
@@ -120,12 +149,14 @@ class Mai_Testimonials_Grid_Block {
 
 		// Byline.
 		$byline = get_post_meta( $post_id, 'byline', true );
+
 		if ( $byline ) {
 			$content .= sprintf( '<span class="entry-byline">%s</span>', sanitize_text_field( $byline ) );
 		}
 
 		// Website URL.
 		$url = get_post_meta( $post_id, 'url', true );
+
 		if ( $url ) {
 			$url      = esc_url( $url );
 			$content .= sprintf( '<span class="entry-website"><a class="entry-website-link" href="%s" target="_blank" rel="noopener" itemprop="url">%s</a></span>', $url, $url );
@@ -139,9 +170,9 @@ class Mai_Testimonials_Grid_Block {
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param array $attributes The entry attributes.
-	 * @param string $context The entry context.
-	 * @param array $args The entry args.
+	 * @param array  $attributes The entry attributes.
+	 * @param string $context    The entry context.
+	 * @param array  $args       The entry args.
 	 *
 	 * @return array
 	 */
@@ -149,9 +180,11 @@ class Mai_Testimonials_Grid_Block {
 		if ( ! $this->is_testimonial( $args ) ) {
 			return $attributes;
 		}
+
 		$attributes['itemprop']  = false;
 		$attributes['itemtype']  = false;
 		$attributes['itemscope'] = false;
+
 		return $attributes;
 	}
 
@@ -168,9 +201,11 @@ class Mai_Testimonials_Grid_Block {
 		if ( ! $args ) {
 			return;
 		}
+
 		if ( ! isset( $args['params']['args']['context'] ) || 'block' !== $args['params']['args']['context'] ) {
 			return false;
 		}
+
 		if ( ! ( isset( $args['params']['entry'] ) && is_object( $args['params']['entry'] ) && 'WP_Post' === get_class( $args['params']['entry'] ) ) ) {
 			return false;
 		}

@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.7.1 (11/27/23)
+* Changed: Update updater.
+
 ## 2.7.0 (6/20/23)
 * Changed: Update updater.
 * Fixed: Added gitignore file for repo tidiness.

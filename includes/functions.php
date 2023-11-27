@@ -59,3 +59,74 @@ function mai_testimonials_get_suffix() {
 
 	return $suffix;
 }
+
+/**
+ * Gets all schemas.
+ *
+ * @access private
+ *
+ * @since TBD
+ *
+ * @param  array $schemas
+ *
+ * @return array
+ */
+function mai_testimonials_get_schemas( $schemas = [] ) {
+	static $cache = [];
+
+	if ( $schemas ) {
+		$cache[] = $schemas;
+	}
+
+	return $cache;
+}
+
+/**
+ * Gets Review schema.
+ * Optionally add new schema to the static variable.
+ *
+ * @access private
+ *
+ * @since TBD
+ *
+ * @param array $review Array of schema data.
+ * @param bool  $clear  If we should clear cache after storing values.
+ *
+ * @return array
+ */
+function mai_testimonials_get_schema( $review = [], $clear = false ) {
+	static $cache = [];
+
+	if ( $review ) {
+		$cache[] = $review;
+	}
+
+	$return = $cache;
+
+	if ( $clear ) {
+		$cache = [];
+	}
+
+	return $return;
+}
+
+/**
+ * Gets sanitized schema content from post.
+ *
+ * @access private
+ *
+ * @since TBD
+ *
+ * @param WP_post $post The post object.
+ *
+ * @return string
+ */
+function mai_testimonials_get_schema_content( $post ) {
+	$content = get_the_content( $post );
+	$content = do_blocks( $content );
+	$content = preg_replace( '@<(script|style)[^>]*?>.*?</\\1>@si', '', $content ); // Strip script and style tags.
+	$content = strip_tags( $content, [ 'a' ] ); // Strip tags, leave links.
+	$content = trim( $content );
+
+	return wpautop( $content );
+}
