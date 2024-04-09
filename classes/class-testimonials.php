@@ -9,6 +9,7 @@ class Mai_Testimonials {
 	public $has_image;
 	public $has_name;
 	public $has_byline;
+	public $has_url;
 	public $has_slider;
 	public $slider_max;
 
