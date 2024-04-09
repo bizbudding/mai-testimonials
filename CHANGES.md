@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.7.2 (4/9/24)
+* Changed: Update updater.
+* Fixed: Dynamic property is deprecated warning.
+
 ## 2.7.1 (11/27/23)
 * Changed: Update updater.
 
