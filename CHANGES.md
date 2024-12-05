@@ -1,14 +1,19 @@
 # Changelog
 
+## 2.7.3 (12/5/24)
+* Changed: Updated the updater.
+* Changed: [Performance] Only run ACF filters in back end.
+* Changed: [Performance] Defer scripts that don't need to run in head.
+
 ## 2.7.2 (4/9/24)
-* Changed: Update updater.
+* Changed: Updated the updater.
 * Fixed: Dynamic property is deprecated warning.
 
 ## 2.7.1 (11/27/23)
-* Changed: Update updater.
+* Changed: Updated the updater.
 
 ## 2.7.0 (6/20/23)
-* Changed: Update updater.
+* Changed: Updated the updater.
 * Fixed: Added gitignore file for repo tidiness.
 
 ## 2.6.3 (4/4/23)

@@ -18,7 +18,7 @@ class Mai_Testimonials_Block {
 	 */
 	function hooks() {
 		add_action( 'acf/init',                                          [ $this, 'register_block' ] );
-		add_action( 'acf/load_field/key=mai_testimonials_taxonomy',      [ $this, 'load_taxonomies' ] );
+		add_filter( 'acf/load_field/key=mai_testimonials_taxonomy',      [ $this, 'load_taxonomies' ] );
 		add_filter( 'acf/load_field/key=mai_testimonials_terms',         [ $this, 'load_terms' ] );
 		add_filter( 'acf/prepare_field/key=mai_testimonials_terms',      [ $this, 'prepare_terms' ] );
 		add_action( 'acf/render_field/key=mai_testimonials_display_tab', [ $this, 'admin_css' ] );
@@ -602,6 +602,10 @@ class Mai_Testimonials_Block {
 	 * @return array
 	 */
 	function load_taxonomies( $field ) {
+		if ( ! is_admin() ) {
+			return $field;
+		}
+
 		$field['choices'] = wp_list_pluck( get_object_taxonomies( 'testimonial', 'objects' ), 'label', 'name' );
 
 		return $field;
@@ -618,6 +622,10 @@ class Mai_Testimonials_Block {
 	 * @return mixed
 	 */
 	function load_terms( $field ) {
+		if ( ! is_admin() ) {
+			return $field;
+		}
+
 		if ( function_exists( 'mai_acf_load_terms' ) ) {
 			$field = mai_acf_load_terms( $field );
 		}
@@ -636,6 +644,10 @@ class Mai_Testimonials_Block {
 	 * @return mixed
 	 */
 	function prepare_terms( $field ) {
+		if ( ! is_admin() ) {
+			return $field;
+		}
+
 		if ( function_exists( 'mai_acf_prepare_terms' ) ) {
 			$field = mai_acf_prepare_terms( $field );
 		}
